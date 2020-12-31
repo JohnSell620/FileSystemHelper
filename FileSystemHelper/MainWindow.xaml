@@ -5,8 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileSystemHelper"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="File System Helper v1.0.0" Height="450" Width="800">
+    <DockPanel>
+        <ToolBarTray Background="White" DockPanel.Dock="Top">
+            <ToolBar x:Name="pluginsToolbar">
+                <!--<Button Content="Summarize" ToolBar.OverflowMode="Never"/>-->
+                <!--<Separator/>-->
+                <!--<Button Content="Organize" ToolBar.OverflowMode="Never" Click="SwitchToOrganizerContent"/>-->
+            </ToolBar>
+        </ToolBarTray>
+        <ContentControl x:Name="contentControl" Grid.Row="1"/>
+    </DockPanel>
 </Window>
