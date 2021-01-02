@@ -15,15 +15,20 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using PluginBase;
 using System.Reflection;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace FileSystemHelper
 {
     public partial class MainWindow : Window
     {
-        Dictionary<string, IComponent> m_components = new Dictionary<string, IComponent>();
+        private Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();
         public MainWindow()
         {
             InitializeComponent();
+
+            Title = "File System Helper v" + ConfigurationManager.AppSettings.Get("Version");
+
             this.contentControl.Content = new FileSystemHelper.FileSystemHelperControl();
             LoadComponents("C:\\Users\\jsell\\source\\repos\\FileSystemHelper\\FileSystemHelper\\bin\\Debug\\");
             AddPluginToolbarContent();
@@ -31,7 +36,7 @@ namespace FileSystemHelper
 
         private void LoadComponents(string directory)
         {
-            m_components.Clear();
+            _components.Clear();
             foreach (var dll in Directory.GetFiles(directory, "*.dll"))
             {
                 var asm = Assembly.LoadFrom(dll);
@@ -40,7 +45,7 @@ namespace FileSystemHelper
                     if (type.GetInterface("IComponent") == typeof(IComponent))
                     {
                         var component = Activator.CreateInstance(type) as IComponent;
-                        m_components[component.Name] = component;
+                        _components[component.Name] = component;
                     }
                 }
                 
@@ -49,23 +54,23 @@ namespace FileSystemHelper
 
         private void AddPluginToolbarContent()
         {
-            foreach (KeyValuePair<string, IComponent> component in m_components)
+            foreach (KeyValuePair<string, IComponent> component in _components)
             {
                 Button button = new Button();
                 button.Content = component.Value.Function;
                 button.Name = component.Value.Function;
-                button.Click += new RoutedEventHandler(toolbarComponent_ButtonClick);
+                button.Click += new RoutedEventHandler(ToolbarComponent_ButtonClick);
                 this.pluginsToolbar.Items.Add(button);
                 Separator separator = new Separator();
                 this.pluginsToolbar.Items.Add(separator);
             }
         }
 
-        private void toolbarComponent_ButtonClick(object sender, EventArgs e)
+        private void ToolbarComponent_ButtonClick(object sender, EventArgs e)
         {
             this.contentControl.Content = new SummarizerPlugin.SummarizerControl();
             var toolbarButton = sender as Button;
-            //var component = m_components[toolbarButton.Name];
+            //var component = _components[toolbarButton.Name];
 
             try
             {

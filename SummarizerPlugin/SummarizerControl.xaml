@@ -4,23 +4,48 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SummarizerPlugin"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             TextElement.FontWeight="Regular"
+             TextElement.FontSize="13"
+             TextOptions.TextFormattingMode="Ideal" 
+             TextOptions.TextRenderingMode="Auto"        
+             Background="{DynamicResource MaterialDesignPaper}"
+             FontFamily="{DynamicResource MaterialDesignFont}"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <Grid x:Name="GridComponent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
         <ToolBarTray Background="White" DockPanel.Dock="Right" Orientation="Vertical">
-            <ToolBar Margin="752,0,-752,0.333">
+            <ToolBar Margin="10,0,-9.667,0.333">
                 <Button Content="Copy" ToolTip="Copy output to clipboard."/>
                 <Separator/>
                 <Button Content="Clear" ToolTip="Clear output."/>
             </ToolBar>
         </ToolBarTray>
-        <Ellipse Height="50" Width="100" Fill="Green"
-                 MouseMove="ellipse_MouseMove"
+
+        <materialDesign:Card x:Name="MDCard">
+            <StackPanel x:Name="_StackPanel" />
+        </materialDesign:Card>
+
+        <Ellipse Height="100" Width="200" Fill="Green"
+                 MouseMove="Ellipse_MouseMove"
                  AllowDrop="True"
-                 DragEnter="ellipse_DragEnter" DragLeave="ellipse_DragLeave"
-                 DragOver="ellipse_DragOver" Drop="ellipse_Drop" />
-                <!--GiveFeedback="ellipse_GiveFeedback"-->
-        <Button Content="Browse Local" HorizontalAlignment="Center" Margin="0,385,0,0" Grid.Row="1" VerticalAlignment="Top" Width="105"/>
-        <TextBox x:Name="output" HorizontalAlignment="Left" Height="62" Margin="145,80,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="500"/>
+                 DragEnter="Ellipse_DragEnter" DragLeave="Ellipse_DragLeave"
+                 DragOver="Ellipse_DragOver" Drop="Ellipse_Drop"
+                 HorizontalAlignment="Center" Margin="100, 250, 100, 550" />
+                <!--GiveFeedback="Ellipse_GiveFeedback"-->
+        
+        <Button x:Name="BrowseButton"
+                Content="Browse Local"
+                Margin="0,385,0,0"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Center"
+                Click="BrowseLocal_Click"/>
+
     </Grid>
 </UserControl>
