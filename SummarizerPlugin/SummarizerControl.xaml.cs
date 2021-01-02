@@ -11,10 +11,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Forms;
 
 namespace SummarizerPlugin
 {
-    public partial class SummarizerControl : UserControl
+    public partial class SummarizerControl : System.Windows.Controls.UserControl
     {
         public SummarizerControl()
         {
@@ -53,7 +54,8 @@ namespace SummarizerPlugin
                     // Clear previous summary.
                     if (_StackPanel.Children.GetType() == typeof(TextBlock) || _StackPanel.Children.Count > 0)
                     {
-                        _StackPanel.Children.Clear();
+                        //_StackPanel.Children.Clear();
+                        SummaryText.Text = "";
                     }
 
                     string textToSummarize = File.ReadAllText(dlg.FileName);
@@ -63,11 +65,15 @@ namespace SummarizerPlugin
                     //    @" have not been well integrated. Programmers work in C# or Visual Basic" +
                     //    @" and also in SQL or XQuery. On the one side are concepts such as classes,";
 
-                    TextBlock textBlock = new TextBlock();
-                    textBlock.Name = "SummaryText";
-                    textBlock.Style = (Style)Application.Current.Resources["MaterialDesignHeadline6TextBlock"];
-                    textBlock.Text = textSummary;
-                    _StackPanel.Children.Add(textBlock);
+                    //TextBlock textBlock = new TextBlock();
+                    //SummaryText.Name = "SummaryText";
+                    //SummaryText.Style = (Style)Application.Current.Resources["MaterialDesignHeadline6TextBlock"];
+                    SummaryText.Text = textSummary;
+                    //
+                    //textBlock.Style ==> materialDesign:TextFieldAssist.Hint="Please copy and/or browse again..."
+                    //
+                    //_StackPanel.Children.Add(textBlock);
+                    MDCard.Visibility = Visibility.Visible;
 
                 }
                 catch (Exception ex)
@@ -76,20 +82,31 @@ namespace SummarizerPlugin
                 }
             }
         }
+
+        private void Copy_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.Clipboard.SetText(SummaryText.Text);
+        }
+
+        private void Clear_Click(object sender, RoutedEventArgs e)
+        {
+            SummaryText.Text = "";
+            MDCard.Visibility = Visibility.Hidden;
+        }
         
-        private void Ellipse_MouseMove(object sender, MouseEventArgs e)
+        private void Ellipse_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Ellipse ellipse = sender as Ellipse;
             if (ellipse != null && e.LeftButton == MouseButtonState.Pressed)
             {
                 DragDrop.DoDragDrop(ellipse,
                                     ellipse.Fill.ToString(),
-                                    DragDropEffects.Copy);
+                                    System.Windows.DragDropEffects.Copy);
             }
         }
 
         private Brush _previousFill = null;
-        private void Ellipse_DragEnter(object sender, DragEventArgs e)
+        private void Ellipse_DragEnter(object sender, System.Windows.DragEventArgs e)
         {
             Ellipse ellipse = sender as Ellipse;
             if (ellipse != null)
@@ -98,9 +115,9 @@ namespace SummarizerPlugin
                 _previousFill = ellipse.Fill;
 
                 // If the DataObject contains string data, extract it.
-                if (e.Data.GetDataPresent(DataFormats.StringFormat))
+                if (e.Data.GetDataPresent(System.Windows.DataFormats.StringFormat))
                 {
-                    string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+                    string dataString = (string)e.Data.GetData(System.Windows.DataFormats.StringFormat);
 
                     // If the string can be converted into a Brush, convert it.
                     BrushConverter converter = new BrushConverter();
@@ -113,25 +130,25 @@ namespace SummarizerPlugin
             }
         }
 
-        private void Ellipse_DragOver(object sender, DragEventArgs e)
+        private void Ellipse_DragOver(object sender, System.Windows.DragEventArgs e)
         {
-            e.Effects = DragDropEffects.None;
+            e.Effects = System.Windows.DragDropEffects.None;
 
             // If the DataObject contains string data, extract it.
-            if (e.Data.GetDataPresent(DataFormats.StringFormat))
+            if (e.Data.GetDataPresent(System.Windows.Forms.DataFormats.StringFormat))
             {
-                string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+                string dataString = (string)e.Data.GetData(System.Windows.Forms.DataFormats.StringFormat);
 
                 // If the string can be converted into a Brush, allow copying.
                 BrushConverter converter = new BrushConverter();
                 if (converter.IsValid(dataString))
                 {
-                    e.Effects = DragDropEffects.Copy | DragDropEffects.Move;
+                    e.Effects = System.Windows.DragDropEffects.Copy | System.Windows.DragDropEffects.Move;
                 }
             }
         }
 
-        private void Ellipse_DragLeave(object sender, DragEventArgs e)
+        private void Ellipse_DragLeave(object sender, System.Windows.DragEventArgs e)
         {
             Ellipse ellipse = sender as Ellipse;
             if (ellipse != null)
@@ -140,15 +157,15 @@ namespace SummarizerPlugin
             }
         }
 
-        private void Ellipse_Drop(object sender, DragEventArgs e)
+        private void Ellipse_Drop(object sender, System.Windows.DragEventArgs e)
         {
             Ellipse ellipse = sender as Ellipse;
             if (ellipse != null)
             {
                 // If the DataObject contains string data, extract it.
-                if (e.Data.GetDataPresent(DataFormats.StringFormat))
+                if (e.Data.GetDataPresent(System.Windows.DataFormats.StringFormat))
                 {
-                    string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+                    string dataString = (string)e.Data.GetData(System.Windows.DataFormats.StringFormat);
 
                     // If the string can be converted into a Brush,
                     // convert it and apply it to the ellipse.

@@ -9,6 +9,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Configuration;
 
 namespace SummarizerPlugin
 {
@@ -39,13 +40,16 @@ namespace SummarizerPlugin
                 sentences[i] = sb.ToString();
             }
 
+
             // Remove stop words--e.g., the, and, a, etc.
-            string[] stopwords = File.ReadAllLines(@"./stopwords.txt");
+            string[] stopwords = File.ReadAllLines(@"C:\Users\jsell\source\repos\FileSystemHelper\SummarizerPlugin\stopwords.txt");
             for (int i = 0; i < sentences.Count(); ++i)
             {
+                string sentence = sentences[i];
                 for (int j = 0; j < stopwords.Count(); ++j)
                 {
-                    sentences[i] = sentences[i].Replace(stopwords[j], "");
+                    string s = string.Join(" ", sentence.Split(' ').Where(wrd => !stopwords.Contains(wrd)));
+                    sentences[i] = s.ToLower();
                 }
             }
 
@@ -53,105 +57,107 @@ namespace SummarizerPlugin
             var stemmer = new PorterStemmer();
             for (int i = 0; i < sentences.Count(); ++i)
             {
-                sentences[i] = stemmer.StemWord(sentences[i]);
+                string stem = stemmer.StemWord(sentences[i]);
+                sentences[i] = stem;
             }
-                        
+
             Dictionary<string, int> wordFrequencies = new Dictionary<string, int>();
             foreach (string s in sentences)
             {
-                if (wordFrequencies.ContainsKey(s))
+                string[] words = s.Split(' ');
+                foreach (string w in words)
                 {
-                    wordFrequencies[s]++;
-                }
-                else
-                {
-                    wordFrequencies[s] = 1;
+                    if (wordFrequencies.ContainsKey(w))
+                    {
+                        wordFrequencies[w] += 1;
+                    }
+                    else
+                    {
+                        wordFrequencies[w] = 1;
+                    }
                 }
             }
-
-            foreach (KeyValuePair<string, int> kvp in wordFrequencies)
-            {
-                Console.WriteLine(kvp.Key + ", " + kvp.Value);
-            }
+            
             // Top N words with highest frequencies will serve as document concepts.
-            int N = 5;
+            String summarySentenceCount = ConfigurationManager.AppSettings.Get("SummarySentenceCount");
+            int N = 4;
             string[] concepts = (from kvp in wordFrequencies
-                            orderby kvp.Value descending
-                            select kvp)
+                                 orderby kvp.Value descending
+                                 select kvp)
                             .ToDictionary(pair => pair.Key, pair => pair.Value).Take(N)
                             .Select(k => k.Key).ToArray();
-            //string[] concepts = conceptQuery.Select(k => k.Key).ToArray();
 
-            //foreach (string s in concepts)
-            //{
-            //    Console.WriteLine(s);
-            //}
+            int documentLength = sentences.Length;
+            var X = DenseMatrix.Create(N, documentLength, (i, j) => 0.0);
+            for (int i = 0; i < X.RowCount; ++i)
+            {
+                int sentencesWithConcept = 0;
+                string concept = concepts[i];
+                for (int j = 0; j < X.ColumnCount; ++j)
+                {
+                    string[] sentenceWords = sentences[j].Split(' ');
+                    int wordCount = (from word in sentenceWords
+                                     where word == concept
+                                     select word)
+                                     .Count();
+                    if (wordCount > 0)
+                    {
+                        sentencesWithConcept += 1;
+                    }
 
-            //int documentLength = sentences.Length;
-            //var X = DenseMatrix.Create(concepts.Length, documentLength, (i, j) => 0.0);
-            //for (int i = 0; i < N; ++i)
-            //{
-            //    int sentencesWithConcept = 0;
-            //    for (int j = 0; j < documentLength; ++j)
-            //    {
-            //        var matchQuery = from word in sentences[j]
-            //                         where word == concepts[i]
-            //                         select word;
-            //        int wordCount = matchQuery.Count();
-            //        if (wordCount > 0)
-            //        {
-            //            sentencesWithConcept += 1;
-            //        }
+                    X[i, j] = wordCount / sentenceWords.Length;
+                }
+                if (sentencesWithConcept == 0)
+                {
+                    Console.WriteLine("No sentences with concept " + concepts[i]);
+                }
+                double inverseDocumentFreq = Math.Log(documentLength / (sentencesWithConcept + 0.0001), 2.0);
+                for (int k = 0; k < X.ColumnCount; ++k)
+                {
+                    X[i, k] = X[i, k] * inverseDocumentFreq;
+                }
+            }
 
-            //        X[i, j] = wordCount / sentences[j].Split(' ').Length;
-            //    }
-            //    if (sentencesWithConcept == 0)
-            //    {
-            //        Console.WriteLine("No sentences with concept " + concepts[i]);
-            //    }
-            //    double inverseDocumentFreq = Math.Log(documentLength/(sentencesWithConcept + 0.0001), 2.0);
-            //    for (int k = 0; k < N; ++k)
-            //    {
-            //        X[i, k] = X[i, k] * inverseDocumentFreq;
-            //    }
-            //}
+            // Compute SVD of the topic representation matrix, X.
+            var svd = X.Svd();
 
-            //// Compute SVD of the topic representation matrix, X.
-            //var svd = X.Svd();
+            // Select sentences via the cross method.
+            int columnCount = svd.VT.ColumnCount;
+            Matrix<double> Vh = svd.VT.SubMatrix(0, concepts.Length, 0, columnCount).PointwiseAbs();
+            for (int i = 0; i < Vh.RowCount; ++i)
+            {
+                double averageSentenceScore = Vh.Row(i).Average();
+                for (int j = 0; j < Vh.ColumnCount; ++j)
+                {
+                    if (Vh[i, j] <= averageSentenceScore)
+                        Vh[i, j] = 0;
+                }
+            }
+            var sentenceLengths = Vh.RowSums();
+            int[] summaryIndices = new int[Vh.RowCount];
+            Console.Write("Vh.RowCnt = ", Vh.RowCount);
+            Console.Write("concepts.Length = ", concepts.Length);
+            for (int i = 0; i < Vh.RowCount; ++i)
+            {
+                double max = 0;
+                for (int j = 0; j < Vh.ColumnCount; ++j)
+                {
+                    if (Vh[i, j] > max)
+                    {
+                        max = Vh[i, j];
+                        summaryIndices[i] = j;
+                    }
 
-            //// Select sentences via the cross method.
-            //Matrix<double> Vh = svd.VT.PointwiseAbs();
-            //for (int i = 0; i < Vh.RowCount; ++i)
-            //{
-            //    double averageSentenceScore = Vh.Row(i).Average();
-            //    for (int j = 0; j < Vh.ColumnCount; ++j)
-            //    {
-            //        if (Vh[i, j] <= averageSentenceScore) Vh[i, j] = 0;
-            //    }
-            //}
-            //var sentenceLengths = Vh.RowSums();
-            //int[] summaryIndices = new int[concepts.Length];
-            //for (int i = 0; i < Vh.RowCount; ++i)
-            //{
-            //    double max = 0;
-            //    for (int j = 0; j < Vh.ColumnCount; ++j)
-            //    {
-            //        if (Vh[i, j] > max)
-            //        {
-            //            max = Vh[i, j];
-            //            summaryIndices[i] = j;
-            //        }
+                }
+            }
 
-            //    }
-            //}
+            string summary = "";
+            foreach (int i in summaryIndices)
+            {
+                summary += sentences[i] + Environment.NewLine;
+            }
 
-            //string summary = "";
-            //foreach (int i in summaryIndices)
-            //{
-            //    summary += sentences[i];
-            //}
-
-            return "summary";
+            return summary;
         }
     }
 }

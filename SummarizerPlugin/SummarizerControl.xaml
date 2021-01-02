@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:SummarizerPlugin"
              mc:Ignorable="d"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
              TextElement.FontWeight="Regular"
              TextElement.FontSize="13"
@@ -15,37 +16,101 @@
              FontFamily="{DynamicResource MaterialDesignFont}"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid x:Name="GridComponent">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        
-        <ToolBarTray Background="White" DockPanel.Dock="Right" Orientation="Vertical">
-            <ToolBar Margin="10,0,-9.667,0.333">
-                <Button Content="Copy" ToolTip="Copy output to clipboard."/>
-                <Separator/>
-                <Button Content="Clear" ToolTip="Clear output."/>
-            </ToolBar>
-        </ToolBarTray>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <materialDesign:Card x:Name="MDCard">
-            <StackPanel x:Name="_StackPanel" />
-        </materialDesign:Card>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <Ellipse Height="100" Width="200" Fill="Green"
+            <StackPanel Margin="16" Grid.Row="0">
+                <StackPanel.Resources>
+                    <system:Double x:Key="IconSize">24</system:Double>
+                </StackPanel.Resources>
+                
+                <Button
+                    Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
+                    ToolTip="Copy output to clipboard."
+                    Margin="10"
+                    Click="Copy_Click">
+                    <materialDesign:PackIcon
+                        Kind="ContentCopy"
+                        Height="{StaticResource IconSize}"
+                        Width="{StaticResource IconSize}" />
+                </Button>
+                
+                <Button
+                    Style="{StaticResource MaterialDesignFloatingActionLightButton}"
+                    ToolTip="Clear text summary from window."
+                    Margin="10"
+                    Click="Clear_Click">
+                    <materialDesign:PackIcon
+                        Kind="Clear"
+                        Height="{StaticResource IconSize}"
+                        Width="{StaticResource IconSize}" />
+                </Button>
+                
+            </StackPanel>
+
+            <DockPanel Grid.Row="1">
+                <Button x:Name="BrowseButton"
+                        DockPanel.Dock="Bottom"
+                        Content="Browse"
+                        Margin="10"
+                        HorizontalAlignment="Center"
+                        Click="BrowseLocal_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Ellipse Stroke="Black"
+                                         StrokeThickness="2">
+                                    <Ellipse.Fill>
+                                        <RadialGradientBrush>
+                                            <GradientStop Offset="0" Color="Lime" />
+                                            <GradientStop Offset="1" Color="Lime" />
+                                            <GradientStop Offset="1" Color="CadetBlue" />
+                                            <RadialGradientBrush.Transform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleY="0.65" />
+                                                </TransformGroup>
+                                            </RadialGradientBrush.Transform>
+                                        </RadialGradientBrush>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </DockPanel>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <materialDesign:Card Visibility="Hidden" x:Name="MDCard" Grid.Row="0" Padding="20" Margin="20" VerticalAlignment="Center">
+                <StackPanel x:Name="_StackPanel">
+                    <TextBlock x:Name="SummaryText" Style="{DynamicResource MaterialDesignHeadline6TextBlock}"/>
+                </StackPanel>
+            </materialDesign:Card>
+
+            <Ellipse Grid.Column="1" Grid.Row="1"
+                 Height="100" Width="200" Fill="CadetBlue"
                  MouseMove="Ellipse_MouseMove"
                  AllowDrop="True"
                  DragEnter="Ellipse_DragEnter" DragLeave="Ellipse_DragLeave"
                  DragOver="Ellipse_DragOver" Drop="Ellipse_Drop"
-                 HorizontalAlignment="Center" Margin="100, 250, 100, 550" />
-                <!--GiveFeedback="Ellipse_GiveFeedback"-->
-        
-        <Button x:Name="BrowseButton"
-                Content="Browse Local"
-                Margin="0,385,0,0"
-                VerticalAlignment="Top"
-                HorizontalAlignment="Center"
-                Click="BrowseLocal_Click"/>
+                 HorizontalAlignment="Center" Margin="10" />
+            <!--GiveFeedback="Ellipse_GiveFeedback"-->
+
+        </Grid>
 
     </Grid>
 </UserControl>

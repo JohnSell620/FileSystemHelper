@@ -54,32 +54,39 @@ namespace FileSystemHelper
 
         private void AddPluginToolbarContent()
         {
+            Dictionary<int, string> styleMap = new Dictionary<int, string>
+            {
+                { 0, "MaterialDesignFloatingActionLightButton" },
+                { 1, "MaterialDesignFloatingActionDarkButton" }
+            };
+            int it = 0;
             foreach (KeyValuePair<string, IComponent> component in _components)
             {
                 Button button = new Button();
-                button.Content = component.Value.Function;
+                button.Content = component.Key;
                 button.Name = component.Value.Function;
-                button.Click += new RoutedEventHandler(ToolbarComponent_ButtonClick);
-                this.pluginsToolbar.Items.Add(button);
-                Separator separator = new Separator();
-                this.pluginsToolbar.Items.Add(separator);
+                button.Style = (Style)Application.Current.Resources[styleMap[it++ % styleMap.Count]];
+                button.Padding = new Thickness(16);
+                button.Margin = new Thickness(16);
+                button.Click += new RoutedEventHandler(PanelComponent_ButtonClick);
+                PluginsPanel.Children.Add(button);
             }
         }
 
-        private void ToolbarComponent_ButtonClick(object sender, EventArgs e)
+        private void PanelComponent_ButtonClick(object sender, EventArgs e)
         {
             this.contentControl.Content = new SummarizerPlugin.SummarizerControl();
-            var toolbarButton = sender as Button;
+            var panelButton = sender as Button;
+            //panelButton.RenderTransform.SetCurrentValue(ScaleTransform, 2);
             //var component = _components[toolbarButton.Name];
 
             try
             {
                 this.Cursor = Cursors.Wait;
-                //this.contentControl.Content = component.Execute();
             }
             catch (Exception exception)
             {
-                // Handle bug in plugin.
+                // Handle bug(s) in plugin.
                 Console.WriteLine(exception.ToString());
             }
             finally

@@ -14,12 +14,18 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
         Height="450" Width="800">
-    <DockPanel>
-        <ToolBarTray Background="White" DockPanel.Dock="Top">
-            <ToolBar x:Name="pluginsToolbar">
-                <!--Plugins here...-->
-            </ToolBar>
-        </ToolBarTray>
-        <ContentControl x:Name="contentControl" />
-    </DockPanel>
+
+    <Viewbox>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel x:Name="PluginsPanel" Grid.Column="0" />
+
+            <ContentControl x:Name="contentControl" Grid.Column="1"/>
+        </Grid>
+    </Viewbox>
+    
 </Window>
