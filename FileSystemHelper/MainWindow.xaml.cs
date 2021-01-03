@@ -23,15 +23,18 @@ namespace FileSystemHelper
     public partial class MainWindow : Window
     {
         private Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();
+        private Dictionary<string, Type> _componentControls = new Dictionary<string, Type>();
+        private string activePluginName;
         public MainWindow()
         {
             InitializeComponent();
 
             Title = "File System Helper v" + ConfigurationManager.AppSettings.Get("Version");
 
-            this.contentControl.Content = new FileSystemHelper.FileSystemHelperControl();
+            contentControl.Content = new FileSystemHelper.FileSystemHelperControl();
             LoadComponents("C:\\Users\\jsell\\source\\repos\\FileSystemHelper\\FileSystemHelper\\bin\\Debug\\");
             AddPluginToolbarContent();
+            activePluginName = "";
         }
 
         private void LoadComponents(string directory)
@@ -46,6 +49,7 @@ namespace FileSystemHelper
                     {
                         var component = Activator.CreateInstance(type) as IComponent;
                         _components[component.Name] = component;
+                        _componentControls[component.Name] = component.Control;
                     }
                 }
                 
@@ -63,8 +67,24 @@ namespace FileSystemHelper
             foreach (KeyValuePair<string, IComponent> component in _components)
             {
                 Button button = new Button();
-                button.Content = component.Key;
-                button.Name = component.Value.Function;
+                //ControlTemplate templateButton = new ControlTemplate(typeof(Button));
+                //DataTemplate dt = new DataTemplate();
+                //FrameworkElementFactory fef = new FrameworkElementFactory(typeof(Viewbox));
+                //templateButton.VisualTree = fef;
+                //fef.AppendChild(new FrameworkElementFactory(typeof(Viewbox)));
+                //dt.VisualTree = fef;
+
+
+                Viewbox vb = new Viewbox();
+                TextBlock tb = new TextBlock();
+                tb.Text = component.Value.Function;
+                vb.Child = tb;
+
+                button.Content = vb;
+                button.Name = component.Key;
+                //dt.Resources.Add(button, vb);
+                //button.Content = component.Key;
+                //button.Name = component.Value.Function;
                 button.Style = (Style)Application.Current.Resources[styleMap[it++ % styleMap.Count]];
                 button.Padding = new Thickness(16);
                 button.Margin = new Thickness(16);
@@ -75,23 +95,55 @@ namespace FileSystemHelper
 
         private void PanelComponent_ButtonClick(object sender, EventArgs e)
         {
-            this.contentControl.Content = new SummarizerPlugin.SummarizerControl();
-            var panelButton = sender as Button;
-            //panelButton.RenderTransform.SetCurrentValue(ScaleTransform, 2);
-            //var component = _components[toolbarButton.Name];
+            Button panelButton = sender as Button;
+            var clickedComponent = _components[panelButton.Name];
+            string clickedComponentName = clickedComponent.Name;
+            //Console.WriteLine("ButtonComponentName: " + clickedPluginName);
 
-            try
+            if (activePluginName != clickedComponentName)
             {
-                this.Cursor = Cursors.Wait;
-            }
-            catch (Exception exception)
-            {
-                // Handle bug(s) in plugin.
-                Console.WriteLine(exception.ToString());
-            }
-            finally
-            {
-                this.Cursor = Cursors.AppStarting;
+
+                foreach (UIElement uie in PluginsPanel.Children.OfType<UIElement>().ToList())
+                {
+                    string pluginName = uie.GetValue(NameProperty).ToString();
+                    string controlName = pluginName + "Plugin." + _componentControls[clickedComponent.Name].ToString();
+                    Type controlType = _componentControls[clickedComponent.Name];
+
+                    if (pluginName == clickedComponentName)
+                    {
+                        //Assembly asm = Assembly.Load(pluginName + "Plugin");
+                        //Type ct = asm.GetType(controlName);
+                        //contentControl.Content = Activator.CreateInstance(ct);
+                        //contentControl.Content = new _componentControls[clickedComponent.Name];
+
+                        contentControl.Content = new SummarizerPlugin.SummarizerControl();
+                        panelButton.Height = panelButton.Height * 1.1;
+                        panelButton.Width = panelButton.Width * 1.1;
+                    }
+                    else if (pluginName == activePluginName)
+                    {
+                        int buttonHeight = Int32.Parse(uie.GetValue(HeightProperty).ToString());
+                        int buttonWidth = Int32.Parse(uie.GetValue(WidthProperty).ToString());
+                        uie.SetValue(HeightProperty, buttonHeight / 1.1);
+                        uie.SetValue(WidthProperty, buttonWidth / 1.1);
+                    }
+                }
+                activePluginName = clickedComponentName;
+                
+                try
+                {
+                    this.Cursor = Cursors.Wait;
+                }
+                catch (Exception exception)
+                {
+                    // Handle bug(s) in plugin.
+                    Console.WriteLine(exception.ToString());
+                }
+                finally
+                {
+                    this.Cursor = Cursors.AppStarting;
+                }
+
             }
         }
     }

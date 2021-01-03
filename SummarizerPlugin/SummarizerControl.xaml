@@ -97,7 +97,9 @@
 
             <materialDesign:Card Visibility="Hidden" x:Name="MDCard" Grid.Row="0" Padding="20" Margin="20" VerticalAlignment="Center">
                 <StackPanel x:Name="_StackPanel">
-                    <TextBlock x:Name="SummaryText" Style="{DynamicResource MaterialDesignHeadline6TextBlock}"/>
+                    <Viewbox>
+                        <TextBlock x:Name="SummaryText" Style="{DynamicResource MaterialDesignHeadline6TextBlock}"/>
+                    </Viewbox>
                 </StackPanel>
             </materialDesign:Card>
 

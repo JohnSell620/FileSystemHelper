@@ -15,7 +15,7 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         Height="450" Width="800">
 
-    <Viewbox>
+    <!--<Viewbox>-->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -26,6 +26,6 @@
 
             <ContentControl x:Name="contentControl" Grid.Column="1"/>
         </Grid>
-    </Viewbox>
+    <!--</Viewbox>-->
     
 </Window>

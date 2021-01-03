@@ -13,6 +13,7 @@ namespace PluginBase
         string Function { get; }
         string Author { get; }
         string Version { get; }
+        Type Control { get; }
         int Execute();
     }
 }

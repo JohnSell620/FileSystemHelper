@@ -21,7 +21,7 @@ namespace SummarizerPlugin
         {
             InitializeComponent();
         }
-
+        
         //private void OnExecute()
         //{
         //    string text = @"Historically, the world of data and the world of objects" +

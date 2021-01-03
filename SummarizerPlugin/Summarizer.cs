@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Configuration;
+using System.Windows.Controls;
 
 namespace SummarizerPlugin
 {
@@ -20,6 +21,7 @@ namespace SummarizerPlugin
         public string Function { get => "Summarize"; }
         public string Author { get => "JS"; }
         public string Version { get => "1.0.0"; }
+        public Type Control { get => typeof(SummarizerControl); }
         public int Execute()
         {
             Console.WriteLine("Hello, File Summarizer.");
