@@ -25,12 +25,11 @@ namespace FileSystemHelper
         private Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();
         private Dictionary<string, Type> _componentControls = new Dictionary<string, Type>();
         private string activePluginName;
+
         public MainWindow()
         {
             InitializeComponent();
-
             Title = "File System Helper v" + ConfigurationManager.AppSettings.Get("Version");
-
             contentControl.Content = new FileSystemHelper.FileSystemHelperControl();
             LoadComponents("C:\\Users\\jsell\\source\\repos\\FileSystemHelper\\FileSystemHelper\\bin\\Debug\\");
             AddPluginToolbarContent();
@@ -78,8 +77,15 @@ namespace FileSystemHelper
                 Viewbox vb = new Viewbox();
                 TextBlock tb = new TextBlock();
                 tb.Text = component.Value.Function;
+                tb.FontSize = 16;
+                tb.TextAlignment = TextAlignment.Center;
+                tb.FontWeight = FontWeights.UltraBold;
+                tb.FontStretch = FontStretches.UltraExpanded;
                 vb.Child = tb;
+                vb.Stretch = Stretch.Uniform;
 
+
+                //button.Content = tb;
                 button.Content = vb;
                 button.Name = component.Key;
                 //dt.Resources.Add(button, vb);
@@ -106,17 +112,19 @@ namespace FileSystemHelper
                 foreach (UIElement uie in PluginsPanel.Children.OfType<UIElement>().ToList())
                 {
                     string pluginName = uie.GetValue(NameProperty).ToString();
-                    string controlName = pluginName + "Plugin." + _componentControls[clickedComponent.Name].ToString();
-                    Type controlType = _componentControls[clickedComponent.Name];
+                    //Type controlType = _componentControls[clickedComponent.Name];
 
                     if (pluginName == clickedComponentName)
                     {
+                        //Console.WriteLine(pluginName + "Plugin");
                         //Assembly asm = Assembly.Load(pluginName + "Plugin");
                         //Type ct = asm.GetType(controlName);
-                        //contentControl.Content = Activator.CreateInstance(ct);
+                        //contentControl.Content = Activator.CreateInstance(ct) as UserControl;
                         //contentControl.Content = new _componentControls[clickedComponent.Name];
 
-                        contentControl.Content = new SummarizerPlugin.SummarizerControl();
+                        contentControl.Content = Activator.CreateInstance(clickedComponent.Control) as UserControl;
+
+                        //contentControl.Content = new SummarizerPlugin.SummarizerControl();
                         panelButton.Height = panelButton.Height * 1.1;
                         panelButton.Width = panelButton.Width * 1.1;
                     }
@@ -130,20 +138,27 @@ namespace FileSystemHelper
                 }
                 activePluginName = clickedComponentName;
                 
-                try
-                {
-                    this.Cursor = Cursors.Wait;
-                }
-                catch (Exception exception)
-                {
-                    // Handle bug(s) in plugin.
-                    Console.WriteLine(exception.ToString());
-                }
-                finally
-                {
-                    this.Cursor = Cursors.AppStarting;
-                }
+                //try
+                //{
+                //    this.Cursor = Cursors.Wait;
+                //}
+                //catch (Exception exception)
+                //{
+                //    // Handle bug(s) in plugin.
+                //    Console.WriteLine(exception.ToString());
+                //}
+                //finally
+                //{
+                //    this.Cursor = Cursors.AppStarting;
+                //}
 
+            }
+            else
+            {
+                panelButton.Height = panelButton.Height / 1.1;
+                panelButton.Width = panelButton.Width / 1.1;
+                contentControl.Content = new FileSystemHelper.FileSystemHelperControl();
+                activePluginName = "";
             }
         }
     }

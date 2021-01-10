@@ -31,33 +31,63 @@
                 <StackPanel.Resources>
                     <system:Double x:Key="IconSize">24</system:Double>
                 </StackPanel.Resources>
-                
-                <Button
-                    Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
-                    ToolTip="Copy output to clipboard."
-                    Margin="10"
-                    Click="Copy_Click">
+
+                <Button x:Name="Copy_Button"
+                        Visibility="Hidden"
+                        Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
+                        ToolTip="Copy output to clipboard."
+                        Margin="10"
+                        Click="Copy_Click">
                     <materialDesign:PackIcon
                         Kind="ContentCopy"
                         Height="{StaticResource IconSize}"
                         Width="{StaticResource IconSize}" />
                 </Button>
-                
-                <Button
-                    Style="{StaticResource MaterialDesignFloatingActionLightButton}"
-                    ToolTip="Clear text summary from window."
-                    Margin="10"
-                    Click="Clear_Click">
+
+                <Button x:Name="Clear_Button"
+                        Visibility="Hidden"
+                        Style="{StaticResource MaterialDesignFloatingActionDarkButton}"
+                        ToolTip="Clear text summary from window."
+                        Margin="10"
+                        Click="Clear_Click">
                     <materialDesign:PackIcon
                         Kind="Clear"
                         Height="{StaticResource IconSize}"
                         Width="{StaticResource IconSize}" />
                 </Button>
-                
+
+                <Button x:Name="AddProperties_Button"
+                        Visibility="Hidden"
+                        Style="{StaticResource MaterialDesignFloatingActionLightButton}"
+                        ToolTip="Add summary text to file properties."
+                        Margin="10"
+                        Click="AddSummaryToFileProperties_Click">
+                    <materialDesign:PackIcon
+                        Kind="File"
+                        Height="{StaticResource IconSize}"
+                        Width="{StaticResource IconSize}" />
+                </Button>
+
             </StackPanel>
 
             <DockPanel Grid.Row="1">
-                <Button x:Name="BrowseButton"
+                <DockPanel.Resources>
+                    <system:Double x:Key="IconSize">24</system:Double>
+                </DockPanel.Resources>
+                
+                <Button
+                    VerticalAlignment="Bottom"
+                    Style="{StaticResource MaterialDesignFloatingActionLightButton}"
+                    Margin="30"
+                    ToolTip="Browse files."
+                    Click="BrowseLocal_Click">
+                    <materialDesign:PackIcon
+                        Kind="Search"
+                        Height="{StaticResource IconSize}"
+                        Width="{StaticResource IconSize}" />
+                </Button>
+
+                <!--<Button x:Name="BrowseButton"
                         DockPanel.Dock="Bottom"
                         Content="Browse"
                         Margin="10"
@@ -72,7 +102,7 @@
                                         <RadialGradientBrush>
                                             <GradientStop Offset="0" Color="Lime" />
                                             <GradientStop Offset="1" Color="Lime" />
-                                            <GradientStop Offset="1" Color="CadetBlue" />
+                                            <GradientStop Offset="1" Color="MediumPurple" />
                                             <RadialGradientBrush.Transform>
                                                 <TransformGroup>
                                                     <ScaleTransform ScaleY="0.65" />
@@ -85,7 +115,7 @@
                             </Grid>
                         </ControlTemplate>
                     </Button.Template>
-                </Button>
+                </Button>-->
             </DockPanel>
         </Grid>
 
@@ -95,22 +125,69 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <materialDesign:Card Visibility="Hidden" x:Name="MDCard" Grid.Row="0" Padding="20" Margin="20" VerticalAlignment="Center">
+            <materialDesign:Card x:Name="MDCardSummary"
+                                 Visibility="Hidden"                                  
+                                 Grid.Row="0" 
+                                 Padding="20" 
+                                 Margin="20" 
+                                 VerticalAlignment="Center">
                 <StackPanel x:Name="_StackPanel">
                     <Viewbox>
-                        <TextBlock x:Name="SummaryText" Style="{DynamicResource MaterialDesignHeadline6TextBlock}"/>
+                        <TextBlock x:Name="SummaryText"
+                                   Width="600" Height="Auto"
+                                   Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
+                                   TextWrapping="Wrap" />
                     </Viewbox>
                 </StackPanel>
             </materialDesign:Card>
 
-            <Ellipse Grid.Column="1" Grid.Row="1"
-                 Height="100" Width="200" Fill="CadetBlue"
-                 MouseMove="Ellipse_MouseMove"
-                 AllowDrop="True"
-                 DragEnter="Ellipse_DragEnter" DragLeave="Ellipse_DragLeave"
-                 DragOver="Ellipse_DragOver" Drop="Ellipse_Drop"
-                 HorizontalAlignment="Center" Margin="10" />
+            <Ellipse x:Name="DragAndDrop"
+                     Grid.Column="1" Grid.Row="1"
+                     Visibility="Visible"
+                     Height="100" Width="200" Fill="Cornsilk"
+                     MouseMove="Ellipse_MouseMove"
+                     AllowDrop="True"
+                     DragEnter="Ellipse_DragEnter" DragLeave="Ellipse_DragLeave"
+                     DragOver="Ellipse_DragOver" Drop="Ellipse_Drop"
+                     HorizontalAlignment="Center" Margin="10" />
             <!--GiveFeedback="Ellipse_GiveFeedback"-->
+
+            <materialDesign:Card x:Name="MDCardFileInfo"
+                                 Visibility="Hidden"                                  
+                                 Grid.Row="1" 
+                                 Padding="20" 
+                                 Margin="20" 
+                                 VerticalAlignment="Center">
+                <StackPanel x:Name="_StackPanel2">
+                    <Viewbox>
+                        <TextBlock x:Name="FileInfo"
+                                   Width="600" Height="Auto"
+                                   Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
+                                   
+                                   Background="AntiqueWhite"
+                                   Foreground="Navy" 
+                                   
+                                   FontFamily="Century Gothic"
+                                   FontSize="12"
+                                   FontStretch="UltraExpanded"
+                                   FontStyle="Italic"
+                                   FontWeight="UltraBold"
+                                   
+                                   LineHeight="Auto"
+                                   Padding="5,10,5,10"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   
+                                   Typography.NumeralStyle="OldStyle"
+                                   Typography.SlashedZero="True"
+                        >
+                            <Run Background="LightGray">File name: </Run>
+                            <LineBreak/><Run Background="LightGray">Main concepts: </Run>
+                            <LineBreak/><Run Background="LightGray">Full path: </Run>
+                        </TextBlock>
+                    </Viewbox>
+                </StackPanel>
+            </materialDesign:Card>
 
         </Grid>
 

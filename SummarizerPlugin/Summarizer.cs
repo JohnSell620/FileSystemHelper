@@ -28,13 +28,16 @@ namespace SummarizerPlugin
             return 0;
         }
 
-        public static string SummarizeByLSA(string input)
+        public static string SummarizeByLSA(TextFile textFile)
         {
-            string[] sentences = Regex.Split(input, @"(?<=[\.!\?])\s+");
+            string input = textFile.RawText;
+            string[] sentences = input.Split(new char[] { '.', '!', '?', ':', '…', '\r', '\n' },
+                StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < sentences.Length; ++i)
             {
                 var sb = new StringBuilder();
-                foreach (char c in sentences[i])
+                string sentence = sentences[i].Trim();
+                foreach (char c in sentence)
                 {
                     if (!char.IsPunctuation(c))
                         sb.Append(c);
@@ -88,6 +91,9 @@ namespace SummarizerPlugin
                                  select kvp)
                             .ToDictionary(pair => pair.Key, pair => pair.Value).Take(N)
                             .Select(k => k.Key).ToArray();
+
+            // Add concepts to TextFile instance properties.
+            textFile.DocumentConcepts = concepts;
 
             int documentLength = sentences.Length;
             var X = DenseMatrix.Create(N, documentLength, (i, j) => 0.0);
@@ -153,10 +159,21 @@ namespace SummarizerPlugin
                 }
             }
 
+            //StringBuilder sbi = new StringBuilder(input);
+            //sbi.Replace(". ", ".$$$").Replace("! ", "!$$$")
+            //    .Replace("? ", "?$$$").Replace(": ", ":$$$")
+            //    .Replace("; ", ";$$$").Replace("… ", "…$$$")
+            //    .Replace("\r\n", "\r\n$$$").Replace("\r", "\r$$$")
+            //    .Replace("\n", "\n$$$");
+            //Console.WriteLine(sbi.ToString());
+            //string[] source = sbi.ToString().Split(new string[] { "$$$" }, StringSplitOptions.RemoveEmptyEntries);
+
+            string[] sourceSentences = Regex.Split(input, @"(?<=[\.!\?])\s+");
+            textFile.DocumentLength = sourceSentences.Length;
             string summary = "";
             foreach (int i in summaryIndices)
             {
-                summary += sentences[i] + Environment.NewLine;
+                summary += sourceSentences[i] + " ";
             }
 
             return summary;

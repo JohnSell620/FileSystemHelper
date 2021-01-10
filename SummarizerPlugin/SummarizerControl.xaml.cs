@@ -38,6 +38,54 @@ namespace SummarizerPlugin
         //    this.SummaryText.Text = SummarizerPlugin.Summarizer.SummarizeByLSA(text);
         //}
 
+        private void GenerateAndPrintSummary(Microsoft.Win32.OpenFileDialog dlg)
+        {
+            //Type type = sender.GetType();
+            //if (type != Microsoft.Win32.OpenFileDialog || type != Brush) return;
+            try
+            {
+                TextFile textFile = new TextFile(dlg.FileName);
+                string summaryText = Summarizer.SummarizeByLSA(textFile);
+
+                // Clear previous summary.
+                if (_StackPanel.Children.GetType() == typeof(TextBlock) || _StackPanel.Children.Count > 0)
+                {
+                    //_StackPanel.Children.Clear();
+                    SummaryText.Text = "";
+                }
+
+                SummaryText.Text = summaryText;
+                MDCardSummary.Visibility = Visibility.Visible;
+                MDCardFileInfo.Visibility = Visibility.Visible;
+                DragAndDrop.Visibility = Visibility.Hidden;
+                Copy_Button.Visibility = Visibility.Visible;
+                Clear_Button.Visibility = Visibility.Visible;
+                AddProperties_Button.Visibility = Visibility.Visible;
+
+                //string textToSummarize = File.ReadAllText(dlg.FileName);
+                //string[] textLines = File.ReadAllLines(dlg.FileName);
+                //string textSummary = @"Historically, the world of data and the world of objects" +
+                //    @" have not been well integrated. Programmers work in C# or Visual Basic" +
+                //    @" and also in SQL or XQuery. On the one side are concepts such as classes,";
+
+                //TextBlock textBlock = new TextBlock();
+                //SummaryText.Name = "SummaryText";
+                //SummaryText.Style = (Style)Application.Current.Resources["MaterialDesignHeadline6TextBlock"];
+                //SummaryText.Text = summaryText;
+                //
+                //textBlock.Style ==> materialDesign:TextFieldAssist.Hint="Please copy and/or browse again..."
+                //
+                //_StackPanel.Children.Add(textBlock);
+                //MDCard.Visibility = Visibility.Visible;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
         private void BrowseLocal_Click(object sender, RoutedEventArgs e)
         {
 
@@ -49,37 +97,7 @@ namespace SummarizerPlugin
 
             if (dlg.ShowDialog() == true)
             {
-                try
-                {
-                    // Clear previous summary.
-                    if (_StackPanel.Children.GetType() == typeof(TextBlock) || _StackPanel.Children.Count > 0)
-                    {
-                        //_StackPanel.Children.Clear();
-                        SummaryText.Text = "";
-                    }
-
-                    string textToSummarize = File.ReadAllText(dlg.FileName);
-                    string[] textLines = File.ReadAllLines(dlg.FileName);
-                    string textSummary = Summarizer.SummarizeByLSA(textToSummarize);
-                    //string textSummary = @"Historically, the world of data and the world of objects" +
-                    //    @" have not been well integrated. Programmers work in C# or Visual Basic" +
-                    //    @" and also in SQL or XQuery. On the one side are concepts such as classes,";
-
-                    //TextBlock textBlock = new TextBlock();
-                    //SummaryText.Name = "SummaryText";
-                    //SummaryText.Style = (Style)Application.Current.Resources["MaterialDesignHeadline6TextBlock"];
-                    SummaryText.Text = textSummary;
-                    //
-                    //textBlock.Style ==> materialDesign:TextFieldAssist.Hint="Please copy and/or browse again..."
-                    //
-                    //_StackPanel.Children.Add(textBlock);
-                    MDCard.Visibility = Visibility.Visible;
-
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
+                GenerateAndPrintSummary(dlg);
             }
         }
 
@@ -91,7 +109,17 @@ namespace SummarizerPlugin
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
             SummaryText.Text = "";
-            MDCard.Visibility = Visibility.Hidden;
+            MDCardSummary.Visibility = Visibility.Hidden;
+            MDCardFileInfo.Visibility = Visibility.Hidden;
+            DragAndDrop.Visibility = Visibility.Visible;
+            Copy_Button.Visibility = Visibility.Hidden;
+            Clear_Button.Visibility = Visibility.Hidden;
+            AddProperties_Button.Visibility = Visibility.Hidden;
+        }
+
+        private void AddSummaryToFileProperties_Click(object sender, RoutedEventArgs e)
+        {
+
         }
         
         private void Ellipse_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
