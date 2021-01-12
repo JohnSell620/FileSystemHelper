@@ -22,29 +22,11 @@ namespace SummarizerPlugin
             InitializeComponent();
         }
         
-        //private void OnExecute()
-        //{
-        //    string text = @"Historically, the world of data and the world of objects" +
-        //     @" have not been well integrated. Programmers work in C# or Visual Basic" +
-        //     @" and also in SQL or XQuery. On the one side are concepts such as classes," +
-        //     @" objects, fields, inheritance, and .NET APIs. On the other side" +
-        //     @" are tables, columns, rows, nodes, and separate languages for dealing with" +
-        //     @" them. Data types often require translation between the two worlds; there are" +
-        //     @" different standard functions. Because the object world has no notion of query, a" +
-        //     @" query can only be represented as a string without compile-time type checking or" +
-        //     @" IntelliSense support in the IDE. Transferring data from SQL tables or XML trees to" +
-        //     @" objects in memory is often tedious and error-prone.";
-
-        //    this.SummaryText.Text = SummarizerPlugin.Summarizer.SummarizeByLSA(text);
-        //}
-
-        private void GenerateAndPrintSummary(Microsoft.Win32.OpenFileDialog dlg)
+        private void GenerateAndPrintSummary(string file)
         {
-            //Type type = sender.GetType();
-            //if (type != Microsoft.Win32.OpenFileDialog || type != Brush) return;
             try
             {
-                TextFile textFile = new TextFile(dlg.FileName);
+                TextFile textFile = new TextFile(file);
                 string summaryText = Summarizer.SummarizeByLSA(textFile);
 
                 // Clear previous summary.
@@ -56,11 +38,21 @@ namespace SummarizerPlugin
 
                 SummaryText.Text = summaryText;
                 MDCardSummary.Visibility = Visibility.Visible;
+
+                Run r1 = new Run("File name: " + textFile.Name);
+                string documentConcepts = "";
+                foreach (string s in textFile.DocumentConcepts) {
+                    documentConcepts += s + ", ";
+                }
+                Run r2 = new Run("Concepts: " + documentConcepts.Remove(documentConcepts.Length - 2));
+                Run r3 = new Run("Location: " + textFile.FullPath);
+
+                FileInfo.Inlines.Add(r1);
+                FileInfo.Inlines.Add(new LineBreak());
+                FileInfo.Inlines.Add(r2);
+                FileInfo.Inlines.Add(new LineBreak());
+                FileInfo.Inlines.Add(r3);
                 MDCardFileInfo.Visibility = Visibility.Visible;
-                DragAndDrop.Visibility = Visibility.Hidden;
-                Copy_Button.Visibility = Visibility.Visible;
-                Clear_Button.Visibility = Visibility.Visible;
-                AddProperties_Button.Visibility = Visibility.Visible;
 
                 //string textToSummarize = File.ReadAllText(dlg.FileName);
                 //string[] textLines = File.ReadAllLines(dlg.FileName);
@@ -89,15 +81,21 @@ namespace SummarizerPlugin
         private void BrowseLocal_Click(object sender, RoutedEventArgs e)
         {
 
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.DefaultExt = "txt";
-            dlg.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            dlg.InitialDirectory = @"C:\Users\jsell\source\repos\";
-            dlg.RestoreDirectory = true;
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                DefaultExt = "txt",
+                Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*",
+                InitialDirectory = @"C:\Users\jsell\source\repos\",
+                RestoreDirectory = true
+            };
 
             if (dlg.ShowDialog() == true)
             {
-                GenerateAndPrintSummary(dlg);
+                DragAndDrop.Visibility = Visibility.Hidden;
+                Copy_Button.Visibility = Visibility.Visible;
+                Clear_Button.Visibility = Visibility.Visible;
+                AddProperties_Button.Visibility = Visibility.Visible;
+                GenerateAndPrintSummary(dlg.FileName);
             }
         }
 
@@ -190,18 +188,28 @@ namespace SummarizerPlugin
             Ellipse ellipse = sender as Ellipse;
             if (ellipse != null)
             {
+                Console.WriteLine("Ellipse_Drop entered...");
                 // If the DataObject contains string data, extract it.
-                if (e.Data.GetDataPresent(System.Windows.DataFormats.StringFormat))
+                if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
                 {
-                    string dataString = (string)e.Data.GetData(System.Windows.DataFormats.StringFormat);
+                    string[] files = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
+                    string firstFileName = files[0].ToString();
+
+                    DragAndDrop.Visibility = Visibility.Hidden;
+                    Copy_Button.Visibility = Visibility.Visible;
+                    Clear_Button.Visibility = Visibility.Visible;
+                    AddProperties_Button.Visibility = Visibility.Visible;
+
+                    GenerateAndPrintSummary(firstFileName);
 
                     // If the string can be converted into a Brush,
                     // convert it and apply it to the ellipse.
                     BrushConverter converter = new BrushConverter();
-                    if (converter.IsValid(dataString))
+                    if (converter.IsValid(firstFileName))
                     {
-                        Brush newFill = (Brush)converter.ConvertFromString(dataString);
+                        Brush newFill = (Brush)converter.ConvertFromString(firstFileName);
                         ellipse.Fill = newFill;
+                        e.Effects = System.Windows.DragDropEffects.Copy;
                     }
                 }
             }

@@ -65,35 +65,40 @@ namespace FileSystemHelper
             int it = 0;
             foreach (KeyValuePair<string, IComponent> component in _components)
             {
-                Button button = new Button();
-                //ControlTemplate templateButton = new ControlTemplate(typeof(Button));
-                //DataTemplate dt = new DataTemplate();
-                //FrameworkElementFactory fef = new FrameworkElementFactory(typeof(Viewbox));
-                //templateButton.VisualTree = fef;
-                //fef.AppendChild(new FrameworkElementFactory(typeof(Viewbox)));
-                //dt.VisualTree = fef;
+                TextBox tb = new TextBox
+                {
+                    Text = component.Value.Function,
+                    FontSize = 24.0,
+                    TextWrapping = TextWrapping.Wrap,
+                    TextAlignment = TextAlignment.Center,
+                    FontWeight = FontWeights.UltraBold,
+                    FontStretch = FontStretches.UltraExpanded,
+                    ToolTip = component.Value.Description
+                };
 
+                Viewbox vb = new Viewbox
+                {
+                    Child = tb,
+                    Stretch = Stretch.Uniform
+                };
 
-                Viewbox vb = new Viewbox();
-                TextBlock tb = new TextBlock();
-                tb.Text = component.Value.Function;
-                tb.FontSize = 16;
-                tb.TextAlignment = TextAlignment.Center;
-                tb.FontWeight = FontWeights.UltraBold;
-                tb.FontStretch = FontStretches.UltraExpanded;
-                vb.Child = tb;
-                vb.Stretch = Stretch.Uniform;
+                Button button = new Button
+                {
+                    //ControlTemplate templateButton = new ControlTemplate(typeof(Button));
+                    //DataTemplate dt = new DataTemplate();
+                    //FrameworkElementFactory fef = new FrameworkElementFactory(typeof(Viewbox));
+                    //templateButton.VisualTree = fef;
+                    //fef.AppendChild(new FrameworkElementFactory(typeof(Viewbox)));
+                    //dt.VisualTree = fef;
+                    //dt.Resources.Add(button, vb);
 
-
-                //button.Content = tb;
-                button.Content = vb;
-                button.Name = component.Key;
-                //dt.Resources.Add(button, vb);
-                //button.Content = component.Key;
-                //button.Name = component.Value.Function;
-                button.Style = (Style)Application.Current.Resources[styleMap[it++ % styleMap.Count]];
-                button.Padding = new Thickness(16);
-                button.Margin = new Thickness(16);
+                    Content = vb,
+                    ToolTip = component.Value.Description,
+                    Name = component.Key,
+                    Style = (Style)Application.Current.Resources[styleMap[it++ % styleMap.Count]],
+                    Padding = new Thickness(4),
+                    Margin = new Thickness(16)
+                };
                 button.Click += new RoutedEventHandler(PanelComponent_ButtonClick);
                 PluginsPanel.Children.Add(button);
             }

@@ -127,7 +127,8 @@
 
             <materialDesign:Card x:Name="MDCardSummary"
                                  Visibility="Hidden"                                  
-                                 Grid.Row="0" 
+                                 Grid.Row="0"
+                                 Background="GhostWhite"
                                  Padding="20" 
                                  Margin="20" 
                                  VerticalAlignment="Center">
@@ -144,13 +145,13 @@
             <Ellipse x:Name="DragAndDrop"
                      Grid.Column="1" Grid.Row="1"
                      Visibility="Visible"
-                     Height="100" Width="200" Fill="Cornsilk"
+                     Height="160" Width="320" Fill="Cornsilk"
                      MouseMove="Ellipse_MouseMove"
                      AllowDrop="True"
                      DragEnter="Ellipse_DragEnter" DragLeave="Ellipse_DragLeave"
                      DragOver="Ellipse_DragOver" Drop="Ellipse_Drop"
                      HorizontalAlignment="Center" Margin="10" />
-            <!--GiveFeedback="Ellipse_GiveFeedback"-->
+                    <!--GiveFeedback="Ellipse_GiveFeedback"-->
 
             <materialDesign:Card x:Name="MDCardFileInfo"
                                  Visibility="Hidden"                                  
@@ -164,27 +165,22 @@
                                    Width="600" Height="Auto"
                                    Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
                                    
-                                   Background="AntiqueWhite"
+                                   Background="GhostWhite"
                                    Foreground="Navy" 
                                    
                                    FontFamily="Century Gothic"
-                                   FontSize="12"
+                                   FontSize="16"
                                    FontStretch="UltraExpanded"
                                    FontStyle="Italic"
-                                   FontWeight="UltraBold"
+                                   FontWeight="Bold"
                                    
-                                   LineHeight="Auto"
-                                   Padding="5,10,5,10"
-                                   TextAlignment="Center"
+                                   LineHeight="20"
+                                   Padding="8"
+                                   TextAlignment="Left"
                                    TextWrapping="Wrap"
                                    
                                    Typography.NumeralStyle="OldStyle"
-                                   Typography.SlashedZero="True"
-                        >
-                            <Run Background="LightGray">File name: </Run>
-                            <LineBreak/><Run Background="LightGray">Main concepts: </Run>
-                            <LineBreak/><Run Background="LightGray">Full path: </Run>
-                        </TextBlock>
+                                   Typography.SlashedZero="True" />
                     </Viewbox>
                 </StackPanel>
             </materialDesign:Card>
