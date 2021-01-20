@@ -59,7 +59,7 @@
                 <Button x:Name="AddProperties_Button"
                         Visibility="Hidden"
                         Style="{StaticResource MaterialDesignFloatingActionLightButton}"
-                        ToolTip="Add summary text to file properties."
+                        ToolTip="Add summary text to file's properties."
                         Margin="10"
                         Click="AddSummaryToFileProperties_Click">
                     <materialDesign:PackIcon

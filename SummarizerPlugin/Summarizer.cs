@@ -27,7 +27,7 @@ namespace SummarizerPlugin
             Console.WriteLine("Hello, File Summarizer.");
             return 0;
         }
-
+        
         public static string SummarizeByLSA(TextFile textFile)
         {
             string input = textFile.RawText;
@@ -44,7 +44,6 @@ namespace SummarizerPlugin
                 }
                 sentences[i] = sb.ToString();
             }
-
 
             // Remove stop words--e.g., the, and, a, etc.
             string[] stopwords = File.ReadAllLines(@"C:\Users\jsell\source\repos\FileSystemHelper\SummarizerPlugin\stopwords.txt");
@@ -129,7 +128,7 @@ namespace SummarizerPlugin
             // Compute SVD of the topic representation matrix, X.
             var svd = X.Svd();
 
-            // Select sentences via the cross method.
+            // Cross method to select summary sentences.
             int columnCount = svd.VT.ColumnCount;
             Matrix<double> Vh = svd.VT.SubMatrix(0, concepts.Length, 0, columnCount).PointwiseAbs();
             for (int i = 0; i < Vh.RowCount; ++i)
@@ -158,16 +157,7 @@ namespace SummarizerPlugin
 
                 }
             }
-
-            //StringBuilder sbi = new StringBuilder(input);
-            //sbi.Replace(". ", ".$$$").Replace("! ", "!$$$")
-            //    .Replace("? ", "?$$$").Replace(": ", ":$$$")
-            //    .Replace("; ", ";$$$").Replace("… ", "…$$$")
-            //    .Replace("\r\n", "\r\n$$$").Replace("\r", "\r$$$")
-            //    .Replace("\n", "\n$$$");
-            //Console.WriteLine(sbi.ToString());
-            //string[] source = sbi.ToString().Split(new string[] { "$$$" }, StringSplitOptions.RemoveEmptyEntries);
-
+            
             string[] sourceSentences = Regex.Split(input, @"(?<=[\.!\?])\s+");
             textFile.DocumentLength = sourceSentences.Length;
             string summary = "";
