@@ -124,67 +124,65 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-
             <materialDesign:Card x:Name="MDCardSummary"
-                                 Visibility="Hidden"                                  
-                                 Grid.Row="0"
-                                 Background="GhostWhite"
-                                 Padding="20" 
-                                 Margin="20" 
-                                 VerticalAlignment="Center">
+                                    Visibility="Hidden"                                  
+                                    Grid.Row="0"
+                                    Background="GhostWhite"
+                                    Padding="20" 
+                                    Margin="20" 
+                                    VerticalAlignment="Center">
                 <StackPanel x:Name="_StackPanel">
                     <Viewbox>
                         <TextBlock x:Name="SummaryText"
-                                   Width="600" Height="Auto"
-                                   Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
-                                   TextWrapping="Wrap" />
+                                    Width="600" Height="Auto"
+                                    Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
+                                    TextWrapping="Wrap" />
                     </Viewbox>
                 </StackPanel>
             </materialDesign:Card>
 
             <Ellipse x:Name="DragAndDrop"
-                     Grid.Column="1" Grid.Row="1"
-                     Visibility="Visible"
-                     Height="160" Width="320" Fill="Cornsilk"
-                     MouseMove="Ellipse_MouseMove"
-                     AllowDrop="True"
-                     DragEnter="Ellipse_DragEnter" DragLeave="Ellipse_DragLeave"
-                     DragOver="Ellipse_DragOver" Drop="Ellipse_Drop"
-                     HorizontalAlignment="Center" Margin="10" />
-                    <!--GiveFeedback="Ellipse_GiveFeedback"-->
+                        Grid.Column="1" Grid.Row="1"
+                        Visibility="Visible"
+                        Height="160" Width="320" Fill="Cornsilk"
+                        MouseMove="Ellipse_MouseMove"
+                        AllowDrop="True"
+                        DragEnter="Ellipse_DragEnter" DragLeave="Ellipse_DragLeave"
+                        DragOver="Ellipse_DragOver" Drop="Ellipse_Drop"
+                        HorizontalAlignment="Center" Margin="10" />
+            <!--GiveFeedback="Ellipse_GiveFeedback"-->
 
             <materialDesign:Card x:Name="MDCardFileInfo"
-                                 Visibility="Hidden"                                  
-                                 Grid.Row="1" 
-                                 Padding="20" 
-                                 Margin="20" 
-                                 VerticalAlignment="Center">
+                                    Visibility="Hidden"                                  
+                                    Grid.Row="1" 
+                                    Padding="20" 
+                                    Margin="20" 
+                                    VerticalAlignment="Center">
                 <StackPanel x:Name="_StackPanel2">
                     <Viewbox>
                         <TextBlock x:Name="FileInfo"
-                                   Width="600" Height="Auto"
-                                   Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
+                                    Width="600" Height="Auto"
+                                    Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
                                    
-                                   Background="GhostWhite"
-                                   Foreground="Navy" 
+                                    Background="GhostWhite"
+                                    Foreground="Navy" 
                                    
-                                   FontFamily="Century Gothic"
-                                   FontSize="16"
-                                   FontStretch="UltraExpanded"
-                                   FontStyle="Italic"
-                                   FontWeight="Bold"
+                                    FontFamily="Century Gothic"
+                                    FontSize="16"
+                                    FontStretch="UltraExpanded"
+                                    FontStyle="Italic"
+                                    FontWeight="Bold"
                                    
-                                   LineHeight="20"
-                                   Padding="8"
-                                   TextAlignment="Left"
-                                   TextWrapping="Wrap"
+                                    LineHeight="20"
+                                    Padding="8"
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap"
                                    
-                                   Typography.NumeralStyle="OldStyle"
-                                   Typography.SlashedZero="True" />
+                                    Typography.NumeralStyle="OldStyle"
+                                    Typography.SlashedZero="True" />
                     </Viewbox>
                 </StackPanel>
             </materialDesign:Card>
-
         </Grid>
 
     </Grid>

@@ -65,7 +65,7 @@ namespace FileSystemHelper
             int it = 0;
             foreach (KeyValuePair<string, IComponent> component in _components)
             {
-                TextBox tb = new TextBox
+                TextBlock tb = new TextBlock
                 {
                     Text = component.Value.Function,
                     FontSize = 24.0,
@@ -84,14 +84,6 @@ namespace FileSystemHelper
 
                 Button button = new Button
                 {
-                    //ControlTemplate templateButton = new ControlTemplate(typeof(Button));
-                    //DataTemplate dt = new DataTemplate();
-                    //FrameworkElementFactory fef = new FrameworkElementFactory(typeof(Viewbox));
-                    //templateButton.VisualTree = fef;
-                    //fef.AppendChild(new FrameworkElementFactory(typeof(Viewbox)));
-                    //dt.VisualTree = fef;
-                    //dt.Resources.Add(button, vb);
-
                     Content = vb,
                     ToolTip = component.Value.Description,
                     Name = component.Key,
@@ -109,7 +101,6 @@ namespace FileSystemHelper
             Button panelButton = sender as Button;
             var clickedComponent = _components[panelButton.Name];
             string clickedComponentName = clickedComponent.Name;
-            //Console.WriteLine("ButtonComponentName: " + clickedPluginName);
 
             if (activePluginName != clickedComponentName)
             {

@@ -11,6 +11,7 @@ using System.Xml;
 using AODL.Document.TextDocuments;
 using AODL.Document.Content;
 using System.Xml.Linq;
+using BitMiracle.Docotic.Pdf;
 
 namespace SummarizerPlugin
 {
@@ -25,36 +26,34 @@ namespace SummarizerPlugin
         public string Summary { get; set; }
 
         public TextFile() { }
-        public TextFile(string fullPath)
+        public TextFile(string _fullPath)
         {
-            Name = Path.GetFileName(fullPath);
-            FullPath = fullPath;
-            Extension = Path.GetExtension(fullPath);
-            if (Extension == ".docx" || Extension == ".pdf")
+            Name = Path.GetFileName(_fullPath);
+            FullPath = _fullPath;
+            Extension = Path.GetExtension(_fullPath);
+
+            try
             {
-                try
+                if (Extension == ".docx")
                 {
-                    RawText = GetTextFromWordOrPDF(fullPath);
+                    RawText = GetTextFromWord(_fullPath);
                 }
-                catch (Exception ex)
+                else if (Extension == ".pdf")
                 {
-                    Console.WriteLine(ex.Data);
+                    RawText = GetTextFromPdf(_fullPath);
+                }
+                else if (Extension == ".odt")
+                {
+                    RawText = GetTextFromOdt(_fullPath);
+                }
+                else /* Extension is .txt */
+                {
+                    RawText = File.ReadAllText(_fullPath);
                 }
             }
-            else if (Extension == ".odt")
+            catch (Exception ex)
             {
-                try
-                {
-                    RawText = GetTextFromOdt(fullPath);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Data);
-                }
-            }
-            else /* Extension is .txt */
-            {
-                RawText = File.ReadAllText(fullPath);
+                Console.WriteLine(ex.Data);
             }
         }
 
@@ -62,11 +61,40 @@ namespace SummarizerPlugin
         {
             try
             {
-                var shellFile = ShellFile.FromFilePath(FullPath);
-                ShellPropertyWriter spw = shellFile.Properties.GetPropertyWriter();
-                spw.WriteProperty(SystemProperties.System.Keywords, DocumentConcepts);
-                spw.WriteProperty(SystemProperties.System.Subject, Summary);
-                spw.Close();
+                if (DocumentConcepts.Length > 0)
+                {
+                    //var shellFile = ShellFile.FromFilePath(FullPath);
+                    var shellProperties = ShellFile.FromFilePath(FullPath).Properties;
+                    shellProperties.System.Keywords.Value = DocumentConcepts;
+                    //shellProperties.System.Subject.Value = Summary;
+                }
+                //Console.WriteLine(_textExtractorResult.Metadata.Values.ToString());
+                // TODO Prompt to elevate privileges...
+                //var shellFile = ShellFile.FromFilePath(FullPath);
+                //var shellProperties = shellFile.Properties;
+                //Console.Write(shellProperties.System.Subject.ToString());
+
+                //Console.WriteLine("\n");
+                //Console.WriteLine("---------------------------------------------------");
+                //foreach (IShellProperty sp in shellProperties.DefaultPropertyCollection)
+                //{
+                //    Console.WriteLine(sp.Description.CanonicalName);
+                //}
+
+                //Console.WriteLine("---------------------------------------------------");
+                //Console.WriteLine(shellProperties.System.ItemTypeText.Value);
+                //Console.WriteLine(shellProperties.System.Keywords.Value);
+                //Console.WriteLine(shellProperties.System.Note.ToString());
+                //Console.WriteLine(shellProperties.System.Subject.Value);
+                //ShellPropertyWriter spw = shellFile.Properties.GetPropertyWriter();
+                //spw.WriteProperty(SystemProperties.System.Keywords, DocumentConcepts);
+                //spw.WriteProperty(SystemProperties.System.Subject, Summary);
+                //spw.Close();
+
+                //foreach (var pair in _textExtractorResult.Metadata)
+                //{
+                //    Console.WriteLine(pair.Key);
+                //}
             }
             catch (Exception ex)
             {
@@ -74,7 +102,22 @@ namespace SummarizerPlugin
             }
         }
 
-        public string GetTextFromWordOrPDF(string file /* SPFile file */)
+        public string GetTextFromPdf(string filePath)
+        {
+            string text = "";
+            using (var pdf = new PdfDocument(filePath))
+            {
+                var options = new PdfTextExtractionOptions
+                {
+                    SkipInvisibleText = true,
+                    WithFormatting = false
+                };
+                text = pdf.GetText(options);
+            }
+            return text;
+        }
+
+        public string GetTextFromWord(string file /* SPFile file */)
         {
             const string wordmlNamespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 

@@ -101,8 +101,8 @@ namespace SummarizerPlugin
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
             {
                 DefaultExt = ".docx",
-                Filter = @"Text Files (.txt)|*.txt|Word Documents (.docx)|*.docx|" +
-                    @"Word Template (.dotx)|*.dotx|ODT Files (.odt)|*.odt|" +
+                Filter = @"Word Documents (.docx)|*.docx|Text Files (.txt)|*.txt|" +
+                    @"Word Template (.dotx)|*.dotx|OpenDocument Text Files (.odt)|*.odt|" +
                     @"PDF Files (.pdf)|*.pdf|All Files (*.*)|*.*",
                 InitialDirectory = @"C:\Users\jsell\source\repos\",
                 Multiselect = true,
