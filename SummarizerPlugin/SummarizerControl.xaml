@@ -19,22 +19,24 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <system:Double x:Key="IconSize">24</system:Double>
+        </Grid.Resources>
 
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel Margin="16" Grid.Row="0">
-                <StackPanel.Resources>
-                    <system:Double x:Key="IconSize">24</system:Double>
-                </StackPanel.Resources>
+            <StackPanel Margin="16,0,0,16" Grid.Row="0">
 
                 <Button x:Name="Copy_Button"
                         Visibility="Hidden"
-                        Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                        Background="GreenYellow"
                         ToolTip="Copy output to clipboard."
                         Margin="10"
                         Click="Copy_Click">
@@ -46,7 +48,8 @@
 
                 <Button x:Name="Clear_Button"
                         Visibility="Hidden"
-                        Style="{StaticResource MaterialDesignFloatingActionDarkButton}"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                        Background="MediumPurple"
                         ToolTip="Clear text summary from window."
                         Margin="10"
                         Click="Clear_Click">
@@ -58,7 +61,8 @@
 
                 <Button x:Name="AddProperties_Button"
                         Visibility="Hidden"
-                        Style="{StaticResource MaterialDesignFloatingActionLightButton}"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                        Background="DarkTurquoise"
                         ToolTip="Add summary text to file's properties."
                         Margin="10"
                         Click="AddSummaryToFileProperties_Click">
@@ -70,97 +74,71 @@
 
             </StackPanel>
 
-            <DockPanel Grid.Row="1">
+            <Button Grid.Row="1"
+                    VerticalAlignment="Bottom"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Margin="20"
+                    ToolTip="Browse files."
+                    Click="BrowseLocal_Click">
+                <materialDesign:PackIcon
+                                Kind="Search"
+                                Height="{StaticResource IconSize}"
+                                Width="{StaticResource IconSize}" />
+            </Button>
+
+            <!--<DockPanel Grid.Row="2">
                 <DockPanel.Resources>
                     <system:Double x:Key="IconSize">24</system:Double>
                 </DockPanel.Resources>
-                
-                <Button
-                    VerticalAlignment="Bottom"
-                    Style="{StaticResource MaterialDesignFloatingActionLightButton}"
-                    Margin="30"
-                    ToolTip="Browse files."
-                    Click="BrowseLocal_Click">
-                    <materialDesign:PackIcon
-                        Kind="Search"
-                        Height="{StaticResource IconSize}"
-                        Width="{StaticResource IconSize}" />
-                </Button>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <!--<Button x:Name="BrowseButton"
-                        DockPanel.Dock="Bottom"
-                        Content="Browse"
-                        Margin="10"
-                        HorizontalAlignment="Center"
-                        Click="BrowseLocal_Click">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Grid>
-                                <Ellipse Stroke="Black"
-                                         StrokeThickness="2">
-                                    <Ellipse.Fill>
-                                        <RadialGradientBrush>
-                                            <GradientStop Offset="0" Color="Lime" />
-                                            <GradientStop Offset="1" Color="Lime" />
-                                            <GradientStop Offset="1" Color="MediumPurple" />
-                                            <RadialGradientBrush.Transform>
-                                                <TransformGroup>
-                                                    <ScaleTransform ScaleY="0.65" />
-                                                </TransformGroup>
-                                            </RadialGradientBrush.Transform>
-                                        </RadialGradientBrush>
-                                    </Ellipse.Fill>
-                                </Ellipse>
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Grid>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>-->
-            </DockPanel>
+                </Grid>
+            </DockPanel>-->
+
         </Grid>
+        <!--GiveFeedback="Ellipse_GiveFeedback"-->
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
+
             <materialDesign:Card x:Name="MDCardSummary"
-                                    Visibility="Hidden"                                  
-                                    Grid.Row="0"
-                                    Background="GhostWhite"
-                                    Padding="20" 
-                                    Margin="20" 
-                                    VerticalAlignment="Center">
+                                 Grid.Row="0"
+                                 Visibility="Hidden"
+                                 Background="GhostWhite"
+                                 Padding="20"
+                                 Margin="10,20,10,20"
+                                 VerticalAlignment="Center" >
                 <StackPanel x:Name="_StackPanel">
                     <Viewbox>
-                        <TextBlock x:Name="SummaryText"
-                                    Width="600" Height="Auto"
-                                    Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
-                                    TextWrapping="Wrap" />
+                        <TextBox x:Name="SummaryText"
+                                 Width="600"
+                                 Height="Auto"
+                                 FontSize="20"
+                                 FontStretch="UltraExpanded"
+                                 FontStyle="Italic"
+                                 FontWeight="Bold"
+                                 Style="{DynamicResource MaterialDesignTextBox}"
+                                 TextWrapping="Wrap" />
                     </Viewbox>
                 </StackPanel>
             </materialDesign:Card>
 
-            <Ellipse x:Name="DragAndDrop"
-                        Grid.Column="1" Grid.Row="1"
-                        Visibility="Visible"
-                        Height="160" Width="320" Fill="Cornsilk"
-                        MouseMove="Ellipse_MouseMove"
-                        AllowDrop="True"
-                        DragEnter="Ellipse_DragEnter" DragLeave="Ellipse_DragLeave"
-                        DragOver="Ellipse_DragOver" Drop="Ellipse_Drop"
-                        HorizontalAlignment="Center" Margin="10" />
-            <!--GiveFeedback="Ellipse_GiveFeedback"-->
-
             <materialDesign:Card x:Name="MDCardFileInfo"
-                                    Visibility="Hidden"                                  
-                                    Grid.Row="1" 
-                                    Padding="20" 
-                                    Margin="20" 
-                                    VerticalAlignment="Center">
+                                 Grid.Row="1"
+                                 Visibility="Hidden"
+                                 Padding="10"
+                                 Margin="10,15,10,40"
+                                 VerticalAlignment="Bottom">
                 <StackPanel x:Name="_StackPanel2">
                     <Viewbox>
-                        <TextBlock x:Name="FileInfo"
+                        <TextBlock  x:Name="FileInfo"
                                     Width="600" Height="Auto"
                                     Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
                                    
@@ -168,22 +146,185 @@
                                     Foreground="Navy" 
                                    
                                     FontFamily="Century Gothic"
-                                    FontSize="16"
+                                    FontSize="18"
                                     FontStretch="UltraExpanded"
-                                    FontStyle="Italic"
                                     FontWeight="Bold"
                                    
-                                    LineHeight="20"
-                                    Padding="8"
+                                    LineHeight="12"
+                                    Padding="10"
                                     TextAlignment="Left"
                                     TextWrapping="Wrap"
                                    
                                     Typography.NumeralStyle="OldStyle"
                                     Typography.SlashedZero="True" />
+                        <!--LineHeight="20"-->
+                        <!--Style="{DynamicResource MaterialDesignHeadline6TextBlock}"-->
                     </Viewbox>
                 </StackPanel>
             </materialDesign:Card>
+
+        </Grid>
+        
+        <Ellipse x:Name="DragAndDrop"
+                 Grid.Column="1"
+                 Visibility="Visible"
+                 Width="320"
+                 Height="220"
+                 Margin="0,80,0,30"
+                 HorizontalAlignment="Center"
+                 Fill="AliceBlue"
+                 MouseMove="Ellipse_MouseMove"
+                 AllowDrop="True"
+                 DragEnter="Ellipse_DragEnter"
+                 DragLeave="Ellipse_DragLeave"
+                 DragOver="Ellipse_DragOver"
+                 Drop="Ellipse_Drop" />
+
+        <!--<materialDesign:DialogHost x:Name="SettingsDialog"
+                                   Grid.Column="1"
+                                   Visibility="Visible"
+                                   Width="300"
+                                   Height="300"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+        </materialDesign:DialogHost>-->
+
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Button x:Name="Settings_Button"
+                    Grid.Row="1"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Margin="20"
+                    ToolTip="Plugin settings."
+                    Click="Settings_Click">
+                <materialDesign:PackIcon Kind="Settings"
+                                         Height="{StaticResource IconSize}"
+                                         Width="{StaticResource IconSize}" />
+            </Button>
+
         </Grid>
 
+        <materialDesign:DialogHost Grid.Column="1"
+                                   Visibility="Hidden"
+                                   DialogClosing="Settings_Click"
+                                   Style="{StaticResource MaterialDesignEmbeddedDialogHost}"
+                                   DialogMargin="8"
+                                   Width="300"
+                                   Height="200"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+            <materialDesign:DialogHost.DialogContent>
+                <StackPanel Margin="16">
+                    <TextBlock Text="Set desired summary length."/>
+
+                    <TextBox
+                                Margin="0 8 0 0"
+                                HorizontalAlignment="Stretch"
+                                x:Name="SelectLengthTextBox"/>
+
+                    <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right" >
+                        <Button
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    IsDefault="True"
+                                    Margin="0 8 8 0"
+                                    Content="ACCEPT"
+                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                            <Button.CommandParameter>
+                                <system:Boolean>True</system:Boolean>
+                            </Button.CommandParameter>
+                        </Button>
+
+                        <Button
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    IsCancel="True"
+                                    Margin="0 8 8 0"
+                                    Content="CANCEL"
+                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                            <Button.CommandParameter>
+                                <system:Boolean>False</system:Boolean>
+                            </Button.CommandParameter>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </materialDesign:DialogHost.DialogContent>
+
+            <Border
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                        ClipToBounds="True"
+                        HorizontalAlignment="Stretch">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--<ComboBox x:Name="FilledComboBox"
+                              Style="{StaticResource MaterialDesignFilledComboBox}"
+                              IsEnabled="{Binding Path=IsChecked, ElementName=FilledComboBoxEnabledCheckBox}"
+                              materialDesign:HintAssist.Hint="Some item"
+                              Width="256"
+                              Height="30" >
+                        <ComboBoxItem Content="2"/>
+                        <ComboBoxItem Content="3"/>
+                        <ComboBoxItem Content="4"/>
+                        <ComboBoxItem Content="5"/>
+                        <ComboBoxItem Content="6"/>
+                        <ComboBoxItem Content="7"/>
+                    </ComboBox>-->
+                    
+                    <ComboBox
+                    materialDesign:HintAssist.Hint="Select summary length"
+                    MinWidth="72"
+                    ItemsSource="{Binding LongListToTestComboVirtualization}"
+                    SelectedValue="{Binding SelectedValueOne}">
+
+                        <ComboBox.SelectedItem>
+                            <Binding
+                            Path="SelectedValueOne"
+                            Mode="TwoWay"
+                            UpdateSourceTrigger="PropertyChanged">
+                                <!--<Binding.ValidationRules>
+                                    <demoAppDomain:NotEmptyValidationRule
+                                    ValidatesOnTargetUpdated="True" />
+                                </Binding.ValidationRules>-->
+                            </Binding>
+                        </ComboBox.SelectedItem>
+
+                        <ComboBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ComboBox.ItemsPanel>
+                    </ComboBox>
+
+                    <materialDesign:ColorZone
+                                Mode="PrimaryMid"
+                                Grid.Row="1"
+                                Effect="{DynamicResource MaterialDesignShadowDepth5}">
+                        <TextBlock
+                                    Margin="16"
+                                    Text="Summarizer options"/>
+                    </materialDesign:ColorZone>
+
+                    <Button
+                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                                Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Right" 
+                                Grid.Row="0"
+                                Margin="0 0 28 -20"
+                                Content="{materialDesign:PackIcon Kind=Select, Size=22}"/>
+                </Grid>
+            </Border>
+        </materialDesign:DialogHost>
+
     </Grid>
+
 </UserControl>

@@ -41,6 +41,9 @@ namespace SummarizerPlugin
                 }
                 Run r2 = new Run("Concepts: " + documentConcepts.Remove(documentConcepts.Length - 2));
                 Run r3 = new Run("Location: " + textFile.FullPath);
+                
+                //System.Windows.Controls.TextBox tb = new System.Windows.Controls.TextBox();
+                //r2.AddHandler(tb);
 
                 FileInfo.Inlines.Clear();
                 FileInfo.Inlines.Add(r1);
@@ -51,11 +54,9 @@ namespace SummarizerPlugin
                 MDCardFileInfo.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
-            {
-                //throw ex;
-                Console.WriteLine(ex.Data);
-            }
-            
+            {                
+                Console.WriteLine(ex.Message); //throw ex;
+            }            
         }
 
         private void ProcessSelectedFiles(string[] fileNames)
@@ -73,6 +74,7 @@ namespace SummarizerPlugin
                 {
                     AddProperties_Button.Visibility = Visibility.Visible;
                 }
+
                 _activeTextFile = new TextFile(fileNames[0]);
                 GenerateAndPrintSummary(_activeTextFile);
             }
@@ -96,22 +98,25 @@ namespace SummarizerPlugin
             }
         }
 
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         private void BrowseLocal_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
             {
                 DefaultExt = ".docx",
-                Filter = @"Word Documents (.docx)|*.docx|Text Files (.txt)|*.txt|" +
-                    @"Word Template (.dotx)|*.dotx|OpenDocument Text Files (.odt)|*.odt|" +
-                    @"PDF Files (.pdf)|*.pdf|All Files (*.*)|*.*",
-                InitialDirectory = @"C:\Users\jsell\source\repos\",
-                Multiselect = true,
-                RestoreDirectory = true
+                InitialDirectory = @"C:\Users\jsell\source\repos\FileSystemHelper\Dev",
+                Filter = @"All Files (*.*)|*.*|Text Files (.txt)|*.txt|" +
+                         @"Word Documents (.docx)|*.docx|Word Template (.dotx)|*.dotx|" +
+                         @"OpenDocument Text Files (.odt)|*.odt|PDF Files (.pdf)|*.pdf",
+                Multiselect = true
             };
 
             if (dlg.ShowDialog() == true)
             {
-                //string[] fileNames = dlg.FileNames;
                 ProcessSelectedFiles(dlg.FileNames);
             }
         }

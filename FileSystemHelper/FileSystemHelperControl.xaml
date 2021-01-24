@@ -6,15 +6,15 @@
              xmlns:local="clr-namespace:FileSystemHelper"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Image 
-        Width="636"
-        Height="300"
+    <Viewbox>
+        <Image 
+        Width="526"
+        Height="295"
         HorizontalAlignment="Center"
-        VerticalAlignment="Top"
-        Margin="80"
-        RenderTransformOrigin="-0.204,0.224">
-        <Image.Source>
-            <BitmapImage DecodePixelWidth="200" UriSource="FSH.jpg"/>
-        </Image.Source>
-    </Image>
+        VerticalAlignment="Center"
+        Margin="121, 80, 153, 0"
+        Source="Resources/FSH2.jpg"/>
+    </Viewbox>
+    <!--RenderTransformOrigin="-0.204,0.224"-->
+    <!--Margin="121,80,153,0"-->
 </UserControl>

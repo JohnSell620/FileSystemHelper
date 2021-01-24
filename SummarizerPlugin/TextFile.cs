@@ -102,7 +102,7 @@ namespace SummarizerPlugin
             }
         }
 
-        public string GetTextFromPdf(string filePath)
+        private string GetTextFromPdf(string filePath)
         {
             string text = "";
             using (var pdf = new PdfDocument(filePath))
@@ -117,11 +117,13 @@ namespace SummarizerPlugin
             return text;
         }
 
-        public string GetTextFromWord(string file /* SPFile file */)
+        private string GetTextFromWord(string file /* SPFile file */)
         {
+            /* from https://bit.ly/2XZi9CF */
+
             const string wordmlNamespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
-            StringBuilder textBuilder = new StringBuilder();
+            System.Text.StringBuilder textBuilder = new System.Text.StringBuilder();
             using (WordprocessingDocument wdDoc = WordprocessingDocument.Open(file /* file.OpenBinaryStream() */, false))
             {
                 // Manage namespaces to perform XPath queries.  
@@ -142,16 +144,18 @@ namespace SummarizerPlugin
                     {
                         textBuilder.Append(textNode.InnerText);
                     }
-                    textBuilder.Append(Environment.NewLine);
+                    textBuilder.Append(System.Environment.NewLine);
                 }
 
             }
             return textBuilder.ToString();
         }
 
-        public string GetTextFromOdt(string path)
+        private string GetTextFromOdt(string path)
         {
-            var sb = new StringBuilder();
+            /* from https://bit.ly/3qIktKA */
+
+            var sb = new System.Text.StringBuilder();
             using (var doc = new TextDocument())
             {
                 doc.Load(path);

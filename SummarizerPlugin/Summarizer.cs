@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Configuration;
-using System.Windows.Controls;
 
 namespace SummarizerPlugin
 {
@@ -42,27 +41,25 @@ namespace SummarizerPlugin
                     if (!char.IsPunctuation(c))
                         sb.Append(c);
                 }
-                sentences[i] = sb.ToString();
+                sentences[i] = sb.ToString().ToLower();
             }
 
             // Remove stop words--e.g., the, and, a, etc.
-            string[] stopwords = File.ReadAllLines(@"C:\Users\jsell\source\repos\FileSystemHelper\SummarizerPlugin\stopwords.txt");
+            string[] stopwords = File.ReadAllLines(@"Resources/stopwords.txt");
             for (int i = 0; i < sentences.Count(); ++i)
             {
                 string sentence = sentences[i];
                 for (int j = 0; j < stopwords.Count(); ++j)
                 {
-                    string s = string.Join(" ", sentence.Split(' ').Where(wrd => !stopwords.Contains(wrd)));
-                    sentences[i] = s.ToLower();
+                    sentences[i] = string.Join(" ", sentence.Split(' ').Where(wrd => !stopwords.Contains(wrd)));
                 }
             }
 
             // Reduce words to their stem.
-            var stemmer = new PorterStemmer();
+            PorterStemmer stemmer = new PorterStemmer();
             for (int i = 0; i < sentences.Count(); ++i)
             {
-                string stem = stemmer.StemWord(sentences[i]);
-                sentences[i] = stem;
+                sentences[i] = stemmer.StemWord(sentences[i]);
             }
 
             Dictionary<string, int> wordFrequencies = new Dictionary<string, int>();
@@ -81,15 +78,18 @@ namespace SummarizerPlugin
                     }
                 }
             }
-            
+
             // Top N words with highest frequencies will serve as document concepts.
-            String summarySentenceCount = ConfigurationManager.AppSettings.Get("SummarySentenceCount");
+            string summarySentenceCount = ConfigurationManager.AppSettings.Get("SummarySentenceCount");
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine("SummarySentenceCount = " + summarySentenceCount);
             int N = 4;
             string[] concepts = (from kvp in wordFrequencies
                                  orderby kvp.Value descending
                                  select kvp)
-                            .ToDictionary(pair => pair.Key, pair => pair.Value).Take(N)
-                            .Select(k => k.Key).ToArray();
+                                .ToDictionary(pair => pair.Key, pair => pair.Value).Take(N)
+                                .Select(k => k.Key).ToArray();
 
             // Add concepts to TextFile instance properties.
             textFile.DocumentConcepts = concepts;
@@ -137,9 +137,12 @@ namespace SummarizerPlugin
                 for (int j = 0; j < Vh.ColumnCount; ++j)
                 {
                     if (Vh[i, j] <= averageSentenceScore)
+                    {
                         Vh[i, j] = 0;
+                    }
                 }
             }
+
             var sentenceLengths = Vh.RowSums();
             int[] summaryIndices = new int[Vh.RowCount];
             Console.Write("Vh.RowCnt = ", Vh.RowCount);
@@ -154,7 +157,6 @@ namespace SummarizerPlugin
                         max = Vh[i, j];
                         summaryIndices[i] = j;
                     }
-
                 }
             }
             
@@ -163,7 +165,7 @@ namespace SummarizerPlugin
             string summary = "";
             foreach (int i in summaryIndices)
             {
-                summary += sourceSentences[i] + " ";
+                summary += sourceSentences[i].Trim() + " ";
             }
 
             return summary;

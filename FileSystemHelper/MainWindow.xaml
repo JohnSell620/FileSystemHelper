@@ -13,19 +13,17 @@
         TextOptions.TextRenderingMode="Auto"        
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Height="450" Width="800">
-
-    <!--<Viewbox>-->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel x:Name="PluginsPanel" Grid.Column="0" />
-
-            <ContentControl x:Name="contentControl" Grid.Column="1"/>
-        </Grid>
-    <!--</Viewbox>-->
-    
+        Height="Auto" Width="800" SizeToContent="Height">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <!--<Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>-->
+        <StackPanel x:Name="PluginsPanel" Grid.Column="0" />
+        <ContentControl x:Name="contentControl" Grid.Column="1"/>
+    </Grid>    
 </Window>
