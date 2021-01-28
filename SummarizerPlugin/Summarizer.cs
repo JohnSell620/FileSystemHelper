@@ -26,7 +26,7 @@ namespace SummarizerPlugin
             Console.WriteLine("Hello, File Summarizer.");
             return 0;
         }
-        
+
         public static string SummarizeByLSA(TextFile textFile)
         {
             string input = textFile.RawText;
@@ -81,9 +81,7 @@ namespace SummarizerPlugin
 
             // Top N words with highest frequencies will serve as document concepts.
             string summarySentenceCount = ConfigurationManager.AppSettings.Get("SummarySentenceCount");
-            Console.WriteLine("------------------------------------------------------------");
-            Console.WriteLine("------------------------------------------------------------");
-            Console.WriteLine("SummarySentenceCount = " + summarySentenceCount);
+            Console.WriteLine("\nSummarySentenceCount = " + summarySentenceCount);
             int N = 4;
             string[] concepts = (from kvp in wordFrequencies
                                  orderby kvp.Value descending
@@ -165,10 +163,16 @@ namespace SummarizerPlugin
             string summary = "";
             foreach (int i in summaryIndices)
             {
-                summary += sourceSentences[i].Trim() + " ";
+                summary += sourceSentences[i] + " ";
             }
 
-            return summary;
+            /* From https://bit.ly/3ogjy2l */
+            return summary.Replace("\r\n", string.Empty)
+                        .Replace("\n", string.Empty)
+                        .Replace("\r", string.Empty)
+                        .Replace("\t", string.Empty)
+                        .Replace(((char)0x2028).ToString(), string.Empty)
+                        .Replace(((char)0x2029).ToString(), string.Empty);
         }
     }
 }

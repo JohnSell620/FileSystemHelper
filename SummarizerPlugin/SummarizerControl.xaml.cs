@@ -12,6 +12,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Forms;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Globalization;
 
 namespace SummarizerPlugin
 {
@@ -42,9 +46,6 @@ namespace SummarizerPlugin
                 Run r2 = new Run("Concepts: " + documentConcepts.Remove(documentConcepts.Length - 2));
                 Run r3 = new Run("Location: " + textFile.FullPath);
                 
-                //System.Windows.Controls.TextBox tb = new System.Windows.Controls.TextBox();
-                //r2.AddHandler(tb);
-
                 FileInfo.Inlines.Clear();
                 FileInfo.Inlines.Add(r1);
                 FileInfo.Inlines.Add(new LineBreak());
@@ -61,18 +62,26 @@ namespace SummarizerPlugin
 
         private void ProcessSelectedFiles(string[] fileNames)
         {
+            /* 
+             * TODO handle improper file types
+             */ 
             DragAndDrop.Visibility = Visibility.Hidden;
             Copy_Button.Visibility = Visibility.Visible;
             Clear_Button.Visibility = Visibility.Visible;
 
             if (fileNames.Length == 1)
             {
+                Regen_Button.Visibility = Visibility.Visible;
                 string fileExt = System.IO.Path.GetExtension(fileNames[0]);
 
                 // Txt file properties cannot be updated.
                 if (fileExt == ".docx" || fileExt == ".odt" || fileExt == ".pdf")
                 {
                     AddProperties_Button.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    AddProperties_Button.Visibility = Visibility.Hidden;
                 }
 
                 _activeTextFile = new TextFile(fileNames[0]);
@@ -97,10 +106,10 @@ namespace SummarizerPlugin
                 GenerateAndPrintSummary(_activeTextFile);
             }
         }
-
-        private void Settings_Click(object sender, RoutedEventArgs e)
+        
+        private async void Settings_ClickAsync(object sender, RoutedEventArgs e)
         {
-
+            object result = await MaterialDesignThemes.Wpf.DialogHost.Show(new ComboBoxViewModel());
         }
 
         private void BrowseLocal_Click(object sender, RoutedEventArgs e)
@@ -121,6 +130,11 @@ namespace SummarizerPlugin
             }
         }
 
+        private void RegenerateSummary_Click(object sender, RoutedEventArgs e)
+        {
+            SummaryText.Text = _activeTextFile.Summary;
+        }
+
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.Clipboard.SetText(SummaryText.Text);
@@ -133,6 +147,7 @@ namespace SummarizerPlugin
             MDCardSummary.Visibility = Visibility.Hidden;
             MDCardFileInfo.Visibility = Visibility.Hidden;
             DragAndDrop.Visibility = Visibility.Visible;
+            Regen_Button.Visibility = Visibility.Hidden;
             Copy_Button.Visibility = Visibility.Hidden;
             Clear_Button.Visibility = Visibility.Hidden;
             AddProperties_Button.Visibility = Visibility.Hidden;
@@ -234,6 +249,90 @@ namespace SummarizerPlugin
                     }
                 }
             }
+        }
+    }
+
+    public class ComboBoxViewModel : INotifyPropertyChanged
+    {
+        private int? _selectedValueOne;
+        private string _selectedTextTwo;
+        private string _selectedValidationOutlined;
+        private string _selectedValidationFilled;
+
+        public ComboBoxViewModel()
+        {
+            LongListToTestComboVirtualization = new List<int>(Enumerable.Range(0, 1000));
+            ShortStringList = new[]
+            {
+                "1",
+                "2",
+                "3",
+                "4 (default)",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10"
+            };
+
+            SelectedValueOne = LongListToTestComboVirtualization.Skip(2).First();
+            SelectedTextTwo = null;
+        }
+
+        public int? SelectedValueOne
+        {
+            get => _selectedValueOne;
+            set => this.MutateVerbose(ref _selectedValueOne, value, RaisePropertyChanged());
+        }
+
+        public string SelectedTextTwo
+        {
+            get => _selectedTextTwo;
+            set => NotifyPropertyChangedExtension.MutateVerbose(this, ref _selectedTextTwo, value, RaisePropertyChanged());
+        }
+
+        public string SelectedValidationFilled
+        {
+            get => _selectedValidationFilled;
+            set => NotifyPropertyChangedExtension.MutateVerbose(this, ref _selectedValidationFilled, value, RaisePropertyChanged());
+        }
+
+        public string SelectedValidationOutlined
+        {
+            get => _selectedValidationOutlined;
+            set => NotifyPropertyChangedExtension.MutateVerbose(this, ref _selectedValidationOutlined, value, RaisePropertyChanged());
+        }
+
+        public IList<int> LongListToTestComboVirtualization { get; }
+        public IList<string> ShortStringList { get; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private System.Action<PropertyChangedEventArgs> RaisePropertyChanged()
+        {
+            return args => PropertyChanged?.Invoke(this, args);
+        }
+    }
+
+    public static class NotifyPropertyChangedExtension
+    {
+        public static bool MutateVerbose<TField>(this INotifyPropertyChanged _, ref TField field, TField newValue, Action<PropertyChangedEventArgs> raise, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<TField>.Default.Equals(field, newValue)) return false;
+            field = newValue;
+            raise?.Invoke(new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+    }
+
+    public class NotEmptyValidationRule : ValidationRule
+    {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        {
+            return string.IsNullOrWhiteSpace((value ?? "").ToString())
+                ? new ValidationResult(false, "Field is required.")
+                : ValidationResult.ValidResult;
         }
     }
 }

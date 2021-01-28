@@ -119,8 +119,9 @@ namespace SummarizerPlugin
 
         private string GetTextFromWord(string file /* SPFile file */)
         {
-            /* from https://bit.ly/2XZi9CF */
-
+            /* 
+             * From https://bit.ly/2XZi9CF 
+             */
             const string wordmlNamespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
             System.Text.StringBuilder textBuilder = new System.Text.StringBuilder();
@@ -153,8 +154,9 @@ namespace SummarizerPlugin
 
         private string GetTextFromOdt(string path)
         {
-            /* from https://bit.ly/3qIktKA */
-
+            /* 
+             * From https://bit.ly/3qIktKA 
+             */
             var sb = new System.Text.StringBuilder();
             using (var doc = new TextDocument())
             {

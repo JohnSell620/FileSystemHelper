@@ -6,15 +6,20 @@
              xmlns:local="clr-namespace:FileSystemHelper"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Viewbox>
-        <Image 
-        Width="526"
-        Height="295"
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"
-        Margin="121, 80, 153, 0"
-        Source="Resources/FSH2.jpg"/>
-    </Viewbox>
-    <!--RenderTransformOrigin="-0.204,0.224"-->
-    <!--Margin="121,80,153,0"-->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Viewbox>
+            <Image Grid.Row="0"
+                   Width="526"
+                   Height="295"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Margin="121, 80, 153, 30"
+                   Source="Resources/FSH2.jpg"/>
+        </Viewbox>
+        <!--RenderTransformOrigin="-0.204,0.224"-->
+        <!--Margin="121,80,153,0"-->
+    </Grid>
 </UserControl>

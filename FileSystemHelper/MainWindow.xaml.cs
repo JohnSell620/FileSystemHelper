@@ -24,7 +24,7 @@ namespace FileSystemHelper
     {
         private Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();
         private Dictionary<string, Type> _componentControls = new Dictionary<string, Type>();
-        private string activePluginName;
+        private string s_activePluginName;
 
         public MainWindow()
         {
@@ -34,7 +34,7 @@ namespace FileSystemHelper
             LoadComponents(".");
             //LoadComponents("C:\\Users\\jsell\\source\\repos\\FileSystemHelper\\FileSystemHelper\\bin\\Debug\\");
             AddPluginToolbarContent();
-            activePluginName = "";
+            s_activePluginName = "";
         }
 
         private void LoadComponents(string directory)
@@ -74,6 +74,7 @@ namespace FileSystemHelper
                         {
                             Text = component.Value.Function,
                             FontSize = 20.0,
+                            FontFamily = new FontFamily("Comic Sans MS"), // Geneva
                             TextWrapping = TextWrapping.Wrap,
                             TextAlignment = TextAlignment.Center,
                             FontWeight = FontWeights.UltraBold,
@@ -87,7 +88,7 @@ namespace FileSystemHelper
                     Name = component.Key,
                     Style = (Style)Application.Current.Resources[styleMap[it++ % styleMap.Count]],
                     Height = 30,
-                    Background = new SolidColorBrush(Colors.Snow),
+                    Background = new SolidColorBrush(Colors.GhostWhite),
                     Padding = new Thickness(4),
                     Margin = new Thickness(16)
                 };
@@ -104,7 +105,7 @@ namespace FileSystemHelper
             var clickedComponent = _components[panelButton.Name];
             string clickedComponentName = clickedComponent.Name;
 
-            if (activePluginName != clickedComponentName)
+            if (s_activePluginName != clickedComponentName)
             {
                 foreach (UIElement uie in PluginsPanel.Children.OfType<UIElement>().ToList())
                 {
@@ -128,7 +129,7 @@ namespace FileSystemHelper
                             Cursor = Cursors.Arrow;
                         }
                     }
-                    else if (pluginName == activePluginName)
+                    else if (pluginName == s_activePluginName)
                     {
                         int buttonHeight = int.Parse(uie.GetValue(HeightProperty).ToString());
                         int buttonWidth = int.Parse(uie.GetValue(WidthProperty).ToString());
@@ -136,14 +137,14 @@ namespace FileSystemHelper
                         uie.SetValue(WidthProperty, buttonWidth / 1.1);
                     }
                 }
-                activePluginName = clickedComponentName;
+                s_activePluginName = clickedComponentName;
             }
             else
             {
                 panelButton.Height = panelButton.Height / 1.1;
                 panelButton.Width = panelButton.Width / 1.1;
                 contentControl.Content = new FileSystemHelperControl();
-                activePluginName = "";
+                s_activePluginName = "";
             }
         }
     }
