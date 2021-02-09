@@ -29,12 +29,31 @@ namespace FileSystemHelper
         public MainWindow()
         {
             InitializeComponent();
+
+            System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
+            ni.Icon = new System.Drawing.Icon("Resources/Main.ico");
+            ni.Visible = true;
+            ni.DoubleClick +=
+                delegate (object sender, EventArgs args)
+                {
+                    Show();
+                    WindowState = WindowState.Normal;
+                };
+
             Title = "File System Helper v" + ConfigurationManager.AppSettings.Get("Version");
             contentControl.Content = new FileSystemHelper.FileSystemHelperControl();
             LoadComponents(".");
             //LoadComponents("C:\\Users\\jsell\\source\\repos\\FileSystemHelper\\FileSystemHelper\\bin\\Debug\\");
             AddPluginToolbarContent();
             s_activePluginName = "";
+        }
+
+        protected override void OnStateChanged(EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+                this.Hide();
+
+            base.OnStateChanged(e);
         }
 
         private void LoadComponents(string directory)
@@ -86,8 +105,9 @@ namespace FileSystemHelper
                     },
                     ToolTip = component.Value.Description,
                     Name = component.Key,
-                    Style = (Style)Application.Current.Resources[styleMap[it++ % styleMap.Count]],
                     Height = 30,
+                    Width = 70,
+                    Style = (Style)Application.Current.Resources[styleMap[it++ % styleMap.Count]],
                     Background = new SolidColorBrush(Colors.GhostWhite),
                     Padding = new Thickness(4),
                     Margin = new Thickness(16)
@@ -131,6 +151,10 @@ namespace FileSystemHelper
                     }
                     else if (pluginName == s_activePluginName)
                     {
+                        Console.WriteLine("---------------------------------------------------");
+                        Console.WriteLine(uie.GetValue(HeightProperty).ToString());
+                        Console.WriteLine(uie.GetValue(WidthProperty).ToString());
+                        Console.WriteLine("---------------------------------------------------");
                         int buttonHeight = int.Parse(uie.GetValue(HeightProperty).ToString());
                         int buttonWidth = int.Parse(uie.GetValue(WidthProperty).ToString());
                         uie.SetValue(HeightProperty, buttonHeight / 1.1);
@@ -146,6 +170,11 @@ namespace FileSystemHelper
                 contentControl.Content = new FileSystemHelperControl();
                 s_activePluginName = "";
             }
+        }
+
+        private void MinimizeToSystemTray(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        {
+
         }
     }
 }

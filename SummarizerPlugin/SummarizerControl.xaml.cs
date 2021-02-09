@@ -16,15 +16,34 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Globalization;
+using System.Threading;
 
 namespace SummarizerPlugin
 {
     public partial class SummarizerControl : System.Windows.Controls.UserControl
     {
         private TextFile _activeTextFile;
+
         public SummarizerControl()
         {
             InitializeComponent();
+        }
+
+        private async void UpdateStatusMessage(string message, int duration = 3)
+        {
+            StatusMessage.Visibility = Visibility.Visible;
+            StatusMessage.Text = message;
+            StatusMessage.Foreground = new SolidColorBrush(Colors.MediumSeaGreen);
+            if (message.ToLower().Contains("error"))
+            {
+                StatusMessage.Foreground = new SolidColorBrush(Colors.PaleVioletRed);
+            }
+
+            // Keep message display duration \in [3, 10] seconds
+            await Task.Run(() => Thread.Sleep(
+                (duration > 10 ? 10 : duration < 3 ? 3 : duration) * 1000));
+
+            StatusMessage.Visibility = Visibility.Hidden;
         }
         
         private void GenerateAndPrintSummary(TextFile textFile)
@@ -32,17 +51,16 @@ namespace SummarizerPlugin
             try
             {
                 string summaryText = Summarizer.SummarizeByLSA(textFile);
-                textFile.Summary = summaryText;
-                
+                textFile.Summary = summaryText;                
                 SummaryText.Text = summaryText;
-                MDCardSummary.Visibility = Visibility.Visible;
 
-                Run r1 = new Run("File name: " + textFile.Name);
                 string documentConcepts = "";
                 foreach (string s in textFile.DocumentConcepts)
                 {
                     documentConcepts += s + ", ";
                 }
+
+                Run r1 = new Run("File name: " + textFile.Name);
                 Run r2 = new Run("Concepts: " + documentConcepts.Remove(documentConcepts.Length - 2));
                 Run r3 = new Run("Location: " + textFile.FullPath);
                 
@@ -52,50 +70,89 @@ namespace SummarizerPlugin
                 FileInfo.Inlines.Add(r2);
                 FileInfo.Inlines.Add(new LineBreak());
                 FileInfo.Inlines.Add(r3);
+
+                MDCardSummary.Visibility = Visibility.Visible;
                 MDCardFileInfo.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {                
-                Console.WriteLine(ex.Message); //throw ex;
+                Console.WriteLine(ex.Message);
             }            
         }
 
         private void ProcessSelectedFiles(string[] fileNames)
         {
             /* 
-             * TODO handle improper file types
-             */ 
-            DragAndDrop.Visibility = Visibility.Hidden;
-            Copy_Button.Visibility = Visibility.Visible;
-            Clear_Button.Visibility = Visibility.Visible;
+             * Handle improper file types
+             */
+            Form wf = new Form() { Size = new System.Drawing.Size(0, 0) };
+            Task.Delay(TimeSpan.FromSeconds(7))
+                .ContinueWith((t) => wf.Close(), TaskScheduler.FromCurrentSynchronizationContext());
 
             if (fileNames.Length == 1)
             {
-                Regen_Button.Visibility = Visibility.Visible;
                 string fileExt = System.IO.Path.GetExtension(fileNames[0]);
-
-                // Txt file properties cannot be updated.
+                                
                 if (fileExt == ".docx" || fileExt == ".odt" || fileExt == ".pdf")
                 {
                     AddProperties_Button.Visibility = Visibility.Visible;
                 }
-                else
+                else if (fileExt == ".txt" /* Txt file properties cannot be updated */) 
                 {
                     AddProperties_Button.Visibility = Visibility.Hidden;
+                }
+                else
+                {
+                    string message = "Unsupported file type selected: " + fileExt +
+                        "\nType must be .docx, .pdf, .odt, or .txt";
+                    string caption = "Unsupported file type...";
+                    System.Windows.Forms.MessageBox.Show(wf, message, caption);
+                    return;
                 }
 
                 _activeTextFile = new TextFile(fileNames[0]);
                 GenerateAndPrintSummary(_activeTextFile);
+
+                Regen_Button.Visibility = Visibility.Visible;
+                DragAndDrop.Visibility = Visibility.Hidden;
+                Copy_Button.Visibility = Visibility.Visible;
+                Clear_Button.Visibility = Visibility.Visible;
             }
-            if (fileNames.Length > 1)
+            else if (fileNames.Length > 1)
             {
                 string overallSummary = "";
                 string overallPath = System.IO.Path.GetDirectoryName(fileNames[0]);
                 foreach (string filePath in fileNames)
                 {
+                    string fileExt = "";
+                    try
+                    {
+                        fileExt = System.IO.Path.GetExtension(filePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    
+                    // Handle invalid file types
+                    if (!"docx|odt|pdf|txt".Contains(fileExt))
+                    {
+                        continue;
+                    }
+
                     _activeTextFile = new TextFile(filePath);
                     overallSummary += Summarizer.SummarizeByLSA(_activeTextFile);
                 }
+
+                if (overallSummary.Length == 0)
+                {
+                    string message = "No supported file types were selected. " +
+                        "\nType must be .docx, .pdf, .odt, or .txt";
+                    string caption = "Unsupported file types...";
+                    System.Windows.Forms.MessageBox.Show(wf, message, caption);
+                    return;
+                }
+
                 _activeTextFile = new TextFile
                 {
                     RawText = overallSummary,
@@ -103,13 +160,16 @@ namespace SummarizerPlugin
                     FullPath = overallPath,
                     Extension = null
                 };
+
                 GenerateAndPrintSummary(_activeTextFile);
             }
         }
         
         private async void Settings_ClickAsync(object sender, RoutedEventArgs e)
         {
-            object result = await MaterialDesignThemes.Wpf.DialogHost.Show(new ComboBoxViewModel());
+            var result = await MaterialDesignThemes.Wpf.DialogHost.Show(new ComboBoxViewModel());
+            Console.WriteLine("\n-----------------------------------------");
+            Console.WriteLine(result);
         }
 
         private void BrowseLocal_Click(object sender, RoutedEventArgs e)
@@ -142,7 +202,7 @@ namespace SummarizerPlugin
 
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
-            _activeTextFile = null;
+            //_activeTextFile = null;
             SummaryText.Text = "";
             MDCardSummary.Visibility = Visibility.Hidden;
             MDCardFileInfo.Visibility = Visibility.Hidden;
@@ -155,14 +215,12 @@ namespace SummarizerPlugin
 
         private void AddSummaryToFileProperties_Click(object sender, RoutedEventArgs e)
         {
+            if (_activeTextFile == null) return;
             if (System.Windows.MessageBox.Show(
                 "Update file's properties with summary and concepts?",
                 "Update file properties", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                if (_activeTextFile != null)
-                {
-                    _activeTextFile.UpdateFileProperties();
-                }
+                UpdateStatusMessage(_activeTextFile.UpdateFileProperties(), 3);
             }
         }
         
@@ -267,7 +325,7 @@ namespace SummarizerPlugin
                 "1",
                 "2",
                 "3",
-                "4 (default)",
+                "4",
                 "5",
                 "6",
                 "7",
@@ -275,6 +333,14 @@ namespace SummarizerPlugin
                 "9",
                 "10"
             };
+
+            int activeDocLength = InstancePipeline.GetActiveDocumentLength();
+            activeDocLength = activeDocLength > 0 ? activeDocLength : 1;
+            //ShortStringList = new[activeDocLength];
+            //for (int i = 1; i <= activeDocLength)
+            //{
+            //    ShortStringList[i - 1] = int.ToString(i);
+            //}
 
             SelectedValueOne = LongListToTestComboVirtualization.Skip(2).First();
             SelectedTextTwo = null;
@@ -312,6 +378,14 @@ namespace SummarizerPlugin
         private System.Action<PropertyChangedEventArgs> RaisePropertyChanged()
         {
             return args => PropertyChanged?.Invoke(this, args);
+        }
+    }
+
+    public class InstancePipeline
+    {
+        public static int GetActiveDocumentLength()
+        {
+            return 0;
         }
     }
 

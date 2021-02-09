@@ -20,7 +20,7 @@ namespace SummarizerPlugin
         public string Function { get => "Summarize"; }
         public string Author { get => "JS"; }
         public string Version { get => "1.0.0"; }
-        public Type Control { get => typeof(SummarizerControl); }
+        public Type Control => typeof(SummarizerControl);
         public int Execute()
         {
             Console.WriteLine("Hello, File Summarizer.");

@@ -57,7 +57,7 @@ namespace SummarizerPlugin
             }
         }
 
-        public void UpdateFileProperties()
+        public string UpdateFileProperties()
         {
             try
             {
@@ -100,6 +100,8 @@ namespace SummarizerPlugin
             {
                 Console.WriteLine(ex.Source.ToString());
             }
+
+            return "Hello from TextFile.UpdateFileProperties.";
         }
 
         private string GetTextFromPdf(string filePath)

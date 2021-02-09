@@ -20,8 +20,19 @@
         <materialDesign:DialogHost.DialogContentTemplate>
             <DataTemplate DataType="local:Settings">
                 <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0">
+                        Select Summary Length
+                    </TextBlock>
 
                     <ComboBox
+                        Grid.Row="1"
                         materialDesign:HintAssist.Hint="Virtualisation"
                         MinWidth="72"
                         ItemsSource="{Binding LongListToTestComboVirtualization}"
@@ -44,6 +55,13 @@
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
+
+                    <StackPanel 
+                        Grid.Row="2"
+                        Orientation="Horizontal">
+                        <Button Padding="4">SUBMIT</Button>
+                        <Button Padding="4">CANCEL</Button>
+                    </StackPanel>
 
                 </Grid>
                 
@@ -155,7 +173,6 @@
                 </StackPanel>
 
             </Grid>
-            <!--GiveFeedback="Ellipse_GiveFeedback"-->
 
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
@@ -225,41 +242,51 @@
 
             </Grid>
 
-            <Ellipse
-                x:Name="DragAndDrop"
-                Grid.Column="1"
-                Visibility="Visible"
-                Width="320"
-                Height="220"
-                Margin="0,80,0,30"
-                HorizontalAlignment="Center"
-                Fill="AliceBlue"
-                MouseMove="Ellipse_MouseMove"
-                AllowDrop="True"
-                DragEnter="Ellipse_DragEnter"
-                DragLeave="Ellipse_DragLeave"
-                DragOver="Ellipse_DragOver"
-                Drop="Ellipse_Drop" />
-
-            <!--<Grid Grid.Column="2">
+            <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+                
+                <Ellipse
+                    x:Name="DragAndDrop"
+                    Grid.Row="0"
+                    Visibility="Visible"
+                    Width="320"
+                    Height="220"
+                    Margin="0,80,0,30"
+                    HorizontalAlignment="Center"
+                    Fill="AliceBlue"
+                    MouseMove="Ellipse_MouseMove"
+                    AllowDrop="True"
+                    DragEnter="Ellipse_DragEnter"
+                    DragLeave="Ellipse_DragLeave"
+                    DragOver="Ellipse_DragOver"
+                    Drop="Ellipse_Drop" />
+                    <!--GiveFeedback="Ellipse_GiveFeedback"-->
 
-                <Button x:Name="Settings_Button"
-                        Grid.Row="1"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Margin="20"
-                        ToolTip="Plugin settings."
-                        Click="Settings_Click"
-                        Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}">
-                    <materialDesign:PackIcon Kind="Settings"
-                                             Height="{StaticResource IconSize}"
-                                             Width="{StaticResource IconSize}" />
-                </Button>
+                <TextBlock
+                    x:Name="StatusMessage"
+                    Visibility="Hidden"
+                    Grid.Row="1" 
+                    Width="600" Height="Auto"
+                                   
+                    Background="GhostWhite"                                   
+                    FontFamily="Century Gothic"
+                    FontSize="14"
+                    FontStretch="UltraExpanded"
+                    FontWeight="Bold"
+                                   
+                    LineHeight="12"
+                    Padding="10"
+                    Margin="20"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap"
+                                   
+                    Typography.NumeralStyle="OldStyle"
+                    Typography.SlashedZero="True"/>
 
-            </Grid>-->
+            </Grid>
 
         </Grid>
     </materialDesign:DialogHost>

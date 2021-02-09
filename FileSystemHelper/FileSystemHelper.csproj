@@ -41,6 +41,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -101,6 +102,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ArchiverPlugin\ArchiverPlugin.csproj">
+      <Project>{a1162eef-5d6d-4bf0-bce3-efe1275c95f4}</Project>
+      <Name>ArchiverPlugin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ImageCaptionerPlugin\ImageCaptionerPlugin.csproj">
+      <Project>{30bc47bc-ef05-40ca-9e47-a8f6f2f1af44}</Project>
+      <Name>ImageCaptionerPlugin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OrganizerPlugin\OrganizerPlugin.csproj">
+      <Project>{054a857d-1490-41b3-bd25-ed0bb2db3cf4}</Project>
+      <Name>OrganizerPlugin</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PluginBase\PluginBase.csproj">
       <Project>{2307580B-1BAD-4711-8D4C-4866A9DDBC0D}</Project>
       <Name>PluginBase</Name>
@@ -116,15 +129,15 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <SplashScreen Include="Resources\FSH.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </SplashScreen>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\FSH2.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\FSHLogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Main.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
