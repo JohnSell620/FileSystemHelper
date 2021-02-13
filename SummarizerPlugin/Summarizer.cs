@@ -80,9 +80,7 @@ namespace SummarizerPlugin
             }
 
             // Top N words with highest frequencies will serve as document concepts.
-            string summarySentenceCount = ConfigurationManager.AppSettings.Get("SummarySentenceCount");
-            Console.WriteLine("\nSummarySentenceCount = " + summarySentenceCount);
-            int N = 4;
+            int N = textFile.DesiredSummaryLength;
             string[] concepts = (from kvp in wordFrequencies
                                  orderby kvp.Value descending
                                  select kvp)

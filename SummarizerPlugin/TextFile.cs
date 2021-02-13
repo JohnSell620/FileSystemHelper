@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAPICodePack.Shell;
-using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
 using DocumentFormat.OpenXml.Packaging;
 using System.Xml;
 using AODL.Document.TextDocuments;
 using AODL.Document.Content;
 using System.Xml.Linq;
 using BitMiracle.Docotic.Pdf;
+using Microsoft.Win32;
 
 namespace SummarizerPlugin
 {
@@ -24,6 +24,7 @@ namespace SummarizerPlugin
         public int DocumentLength { get; set; }
         public string[] DocumentConcepts { get; set; }
         public string Summary { get; set; }
+        public int DesiredSummaryLength { get; set; }
 
         public TextFile() { }
         public TextFile(string _fullPath)
@@ -31,6 +32,7 @@ namespace SummarizerPlugin
             Name = Path.GetFileName(_fullPath);
             FullPath = _fullPath;
             Extension = Path.GetExtension(_fullPath);
+            DesiredSummaryLength = 4;
 
             try
             {
@@ -61,47 +63,38 @@ namespace SummarizerPlugin
         {
             try
             {
-                if (DocumentConcepts.Length > 0)
+                // Check whether Microsoft Word is installed on this computer,
+                // by searching the HKEY_CLASSES_ROOT\Word.Application key.
+                using (var regWord = Registry.ClassesRoot.OpenSubKey("Word.Application"))
                 {
-                    //var shellFile = ShellFile.FromFilePath(FullPath);
-                    var shellProperties = ShellFile.FromFilePath(FullPath).Properties;
-                    shellProperties.System.Keywords.Value = DocumentConcepts;
-                    //shellProperties.System.Subject.Value = Summary;
+                    if (regWord == null)
+                    {
+                        return "Microsoft Word is not installed";
+                    }
+                    else
+                    {
+                        if (DocumentConcepts.Length > 0)
+                        {
+                            // TODO Prompt to elevate privileges...
+                            var shellProperties = ShellFile.FromFilePath(FullPath).Properties;
+                            shellProperties.System.Keywords.Value = DocumentConcepts;
+                            shellProperties.System.Subject.Value = Summary;
+
+                            //// using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
+                            //ShellPropertyWriter spw = shellFile.Properties.GetPropertyWriter();
+                            //spw.WriteProperty(SystemProperties.System.Keywords, DocumentConcepts);
+                            //spw.WriteProperty(SystemProperties.System.Subject, Summary);
+                            //spw.Close();
+                        }
+                    }
                 }
-                //Console.WriteLine(_textExtractorResult.Metadata.Values.ToString());
-                // TODO Prompt to elevate privileges...
-                //var shellFile = ShellFile.FromFilePath(FullPath);
-                //var shellProperties = shellFile.Properties;
-                //Console.Write(shellProperties.System.Subject.ToString());
-
-                //Console.WriteLine("\n");
-                //Console.WriteLine("---------------------------------------------------");
-                //foreach (IShellProperty sp in shellProperties.DefaultPropertyCollection)
-                //{
-                //    Console.WriteLine(sp.Description.CanonicalName);
-                //}
-
-                //Console.WriteLine("---------------------------------------------------");
-                //Console.WriteLine(shellProperties.System.ItemTypeText.Value);
-                //Console.WriteLine(shellProperties.System.Keywords.Value);
-                //Console.WriteLine(shellProperties.System.Note.ToString());
-                //Console.WriteLine(shellProperties.System.Subject.Value);
-                //ShellPropertyWriter spw = shellFile.Properties.GetPropertyWriter();
-                //spw.WriteProperty(SystemProperties.System.Keywords, DocumentConcepts);
-                //spw.WriteProperty(SystemProperties.System.Subject, Summary);
-                //spw.Close();
-
-                //foreach (var pair in _textExtractorResult.Metadata)
-                //{
-                //    Console.WriteLine(pair.Key);
-                //}
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Source.ToString());
             }
 
-            return "Hello from TextFile.UpdateFileProperties.";
+            return "File property updates successful.";
         }
 
         private string GetTextFromPdf(string filePath)

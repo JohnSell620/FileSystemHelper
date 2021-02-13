@@ -23,10 +23,12 @@ namespace SummarizerPlugin
     public partial class SummarizerControl : System.Windows.Controls.UserControl
     {
         private TextFile _activeTextFile;
+        private int _desiredSummaryLength;
 
         public SummarizerControl()
         {
             InitializeComponent();
+            _desiredSummaryLength = 4;
         }
 
         private async void UpdateStatusMessage(string message, int duration = 3)
@@ -111,6 +113,7 @@ namespace SummarizerPlugin
                 }
 
                 _activeTextFile = new TextFile(fileNames[0]);
+                _activeTextFile.DesiredSummaryLength = _desiredSummaryLength;
                 GenerateAndPrintSummary(_activeTextFile);
 
                 Regen_Button.Visibility = Visibility.Visible;
@@ -167,9 +170,13 @@ namespace SummarizerPlugin
         
         private async void Settings_ClickAsync(object sender, RoutedEventArgs e)
         {
-            var result = await MaterialDesignThemes.Wpf.DialogHost.Show(new ComboBoxViewModel());
-            Console.WriteLine("\n-----------------------------------------");
-            Console.WriteLine(result);
+            int activeTextFileLength = _activeTextFile == null ? 10 : _activeTextFile.DocumentLength;
+            ComboBoxViewModel cbvm = new ComboBoxViewModel(activeTextFileLength);
+            var result = await MaterialDesignThemes.Wpf.DialogHost.Show(cbvm);
+            if ((bool)result)
+            {
+                _desiredSummaryLength = cbvm.SelectedValueOne.Value;
+            }
         }
 
         private void BrowseLocal_Click(object sender, RoutedEventArgs e)
@@ -192,7 +199,8 @@ namespace SummarizerPlugin
 
         private void RegenerateSummary_Click(object sender, RoutedEventArgs e)
         {
-            SummaryText.Text = _activeTextFile.Summary;
+            Clear_Click(null, null);
+            GenerateAndPrintSummary(_activeTextFile);
         }
 
         private void Copy_Click(object sender, RoutedEventArgs e)
@@ -202,7 +210,6 @@ namespace SummarizerPlugin
 
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
-            //_activeTextFile = null;
             SummaryText.Text = "";
             MDCardSummary.Visibility = Visibility.Hidden;
             MDCardFileInfo.Visibility = Visibility.Hidden;
@@ -213,7 +220,7 @@ namespace SummarizerPlugin
             AddProperties_Button.Visibility = Visibility.Hidden;
         }
 
-        private void AddSummaryToFileProperties_Click(object sender, RoutedEventArgs e)
+        private void UpdateFileProperties_Click(object sender, RoutedEventArgs e)
         {
             if (_activeTextFile == null) return;
             if (System.Windows.MessageBox.Show(
@@ -317,31 +324,17 @@ namespace SummarizerPlugin
         private string _selectedValidationOutlined;
         private string _selectedValidationFilled;
 
-        public ComboBoxViewModel()
+        public ComboBoxViewModel(int activeDocLength)
         {
-            LongListToTestComboVirtualization = new List<int>(Enumerable.Range(0, 1000));
-            ShortStringList = new[]
-            {
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10"
-            };
-
-            int activeDocLength = InstancePipeline.GetActiveDocumentLength();
+            //int activeDocLength = InstancePipeline.GetActiveDocumentLength();
             activeDocLength = activeDocLength > 0 ? activeDocLength : 1;
-            //ShortStringList = new[activeDocLength];
-            //for (int i = 1; i <= activeDocLength)
-            //{
-            //    ShortStringList[i - 1] = int.ToString(i);
-            //}
-
+            int maxSummaryLength = activeDocLength > 10 ? 10 : activeDocLength;
+            ShortStringList = new string[maxSummaryLength];
+            for (int i = 1; i <= maxSummaryLength; ++i)
+            {
+                ShortStringList[i - 1] = i.ToString();
+            }
+            LongListToTestComboVirtualization = new List<int>(Enumerable.Range(2, maxSummaryLength + 1));
             SelectedValueOne = LongListToTestComboVirtualization.Skip(2).First();
             SelectedTextTwo = null;
         }
@@ -385,7 +378,7 @@ namespace SummarizerPlugin
     {
         public static int GetActiveDocumentLength()
         {
-            return 0;
+            return 10;
         }
     }
 

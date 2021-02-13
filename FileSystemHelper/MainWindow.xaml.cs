@@ -41,10 +41,9 @@ namespace FileSystemHelper
                 };
 
             Title = "File System Helper v" + ConfigurationManager.AppSettings.Get("Version");
-            contentControl.Content = new FileSystemHelper.FileSystemHelperControl();
             LoadComponents(".");
-            //LoadComponents("C:\\Users\\jsell\\source\\repos\\FileSystemHelper\\FileSystemHelper\\bin\\Debug\\");
             AddPluginToolbarContent();
+            contentControl.Content = new FileSystemHelperControl(_components);
             s_activePluginName = "";
         }
 
@@ -151,10 +150,6 @@ namespace FileSystemHelper
                     }
                     else if (pluginName == s_activePluginName)
                     {
-                        Console.WriteLine("---------------------------------------------------");
-                        Console.WriteLine(uie.GetValue(HeightProperty).ToString());
-                        Console.WriteLine(uie.GetValue(WidthProperty).ToString());
-                        Console.WriteLine("---------------------------------------------------");
                         int buttonHeight = int.Parse(uie.GetValue(HeightProperty).ToString());
                         int buttonWidth = int.Parse(uie.GetValue(WidthProperty).ToString());
                         uie.SetValue(HeightProperty, buttonHeight / 1.1);
@@ -167,7 +162,7 @@ namespace FileSystemHelper
             {
                 panelButton.Height = panelButton.Height / 1.1;
                 panelButton.Width = panelButton.Width / 1.1;
-                contentControl.Content = new FileSystemHelperControl();
+                contentControl.Content = new FileSystemHelperControl(_components);
                 s_activePluginName = "";
             }
         }

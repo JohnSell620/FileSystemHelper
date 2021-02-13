@@ -17,11 +17,7 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>-->
-        <StackPanel x:Name="PluginsPanel" Grid.Column="0" />
+        <StackPanel x:Name="PluginsPanel" Grid.Column="0" Width="120" />
         <ContentControl x:Name="contentControl" Grid.Column="1"/>
     </Grid>    
 </Window>

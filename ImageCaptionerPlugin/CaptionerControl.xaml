@@ -27,40 +27,62 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock
-                        Grid.Row="0">
-                        Automatically apply caption to selected file(s)?
-                    </TextBlock>
+                        Grid.Row="0"
+                        Padding="10"                        
+                        FontSize="9"
+                        Text="TextAutomatically apply caption to selected file(s)?" />
 
-                    <ComboBox
+                    <ToggleButton
                         Grid.Row="1"
-                        materialDesign:HintAssist.Hint="Virtualisation"
-                        MinWidth="72"
-                        ItemsSource="{Binding LongListToTestComboVirtualization}"
-                        SelectedValue="{Binding SelectedValueOne}">
+                        Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                        ToolTip="Automatically apply caption to selected file(s)?">
 
-                        <ComboBox.SelectedItem>
+                        <ToggleButton.IsChecked>
                             <Binding
-                                Path="SelectedValueOne"
+                                Path="IsEnabled"
                                 Mode="TwoWay"
-                                UpdateSourceTrigger="PropertyChanged">
-                                <Binding.ValidationRules>
-                                    <NotifyDataErrorValidationRule ValidatesOnTargetUpdated="True" />
-                                </Binding.ValidationRules>
-                            </Binding>
-                        </ComboBox.SelectedItem>
+                                UpdateSourceTrigger="PropertyChanged" />
+                        </ToggleButton.IsChecked>
+                        
+                        <materialDesign:PackIcon
+                            Kind="Pin"
+                            RenderTransformOrigin=".5,.5">
+                            <materialDesign:PackIcon.RenderTransform>
+                                <RotateTransform Angle="45"/>
+                            </materialDesign:PackIcon.RenderTransform>
+                        </materialDesign:PackIcon>
 
-                        <ComboBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <VirtualizingStackPanel />
-                            </ItemsPanelTemplate>
-                        </ComboBox.ItemsPanel>
-                    </ComboBox>
+                        <materialDesign:ToggleButtonAssist.OnContent>
+                            <materialDesign:PackIcon Kind="Pin"/>
+                        </materialDesign:ToggleButtonAssist.OnContent>
+                    </ToggleButton>
 
                     <StackPanel 
                         Grid.Row="2"
-                        Orientation="Horizontal">
-                        <Button Padding="4">SUBMIT</Button>
-                        <Button Padding="4">CANCEL</Button>
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                        <Button
+                            x:Name="AcceptButton"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            IsDefault="True"
+                            Margin="0 8 8 0"
+                            Content="ACCEPT"
+                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                            <Button.CommandParameter>
+                                <system:Boolean>True</system:Boolean>
+                            </Button.CommandParameter>
+                        </Button>
+
+                        <Button
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            IsCancel="True"
+                            Margin="0 8 8 0"
+                            Content="CANCEL"
+                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                            <Button.CommandParameter>
+                                <system:Boolean>False</system:Boolean>
+                            </Button.CommandParameter>
+                        </Button>
                     </StackPanel>
 
                 </Grid>
@@ -121,7 +143,7 @@
                         Background="DarkTurquoise"
                         ToolTip="Add caption text to image file's properties."
                         Margin="10"
-                        Click="AddSummaryToFileProperties_Click">
+                        Click="UpdateFileProperties_Click">
                         <materialDesign:PackIcon
                             Kind="File"
                             Height="{StaticResource IconSize}"
@@ -182,7 +204,7 @@
                                 x:Name="CaptionText"
                                 Width="600"
                                 Height="Auto"
-                                FontSize="20"
+                                FontSize="18"
                                 FontStretch="UltraExpanded"
                                 FontStyle="Italic"
                                 FontWeight="Bold"
@@ -230,9 +252,9 @@
                                 Foreground="Navy" 
                                    
                                 FontFamily="Century Gothic"
-                                FontSize="18"
+                                FontSize="14"
                                 FontStretch="UltraExpanded"
-                                FontWeight="Bold"
+                                FontWeight="Medium"
                                    
                                 LineHeight="12"
                                 Padding="10"
@@ -268,7 +290,6 @@
                     DragLeave="Ellipse_DragLeave"
                     DragOver="Ellipse_DragOver"
                     Drop="Ellipse_Drop" />
-                <!--GiveFeedback="Ellipse_GiveFeedback"-->
 
                 <TextBlock
                     x:Name="StatusMessage"

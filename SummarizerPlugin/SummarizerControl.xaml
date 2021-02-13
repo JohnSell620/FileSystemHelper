@@ -59,8 +59,27 @@
                     <StackPanel 
                         Grid.Row="2"
                         Orientation="Horizontal">
-                        <Button Padding="4">SUBMIT</Button>
-                        <Button Padding="4">CANCEL</Button>
+                        <Button
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            IsDefault="True"
+                            Margin="0 8 8 0"
+                            Content="ACCEPT"
+                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                            <Button.CommandParameter>
+                                <system:Boolean>True</system:Boolean>
+                            </Button.CommandParameter>
+                        </Button>
+
+                        <Button
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            IsCancel="True"
+                            Margin="0 8 8 0"
+                            Content="CANCEL"
+                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                            <Button.CommandParameter>
+                                <system:Boolean>False</system:Boolean>
+                            </Button.CommandParameter>
+                        </Button>
                     </StackPanel>
 
                 </Grid>
@@ -135,7 +154,7 @@
                         Background="DarkTurquoise"
                         ToolTip="Add summary text to file's properties."
                         Margin="10"
-                        Click="AddSummaryToFileProperties_Click">                        
+                        Click="UpdateFileProperties_Click">                        
                         <materialDesign:PackIcon
                             Kind="File"
                             Height="{StaticResource IconSize}"

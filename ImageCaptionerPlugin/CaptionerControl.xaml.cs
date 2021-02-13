@@ -21,16 +21,15 @@ using System.Threading;
 
 namespace ImageCaptionerPlugin
 {
-    /// <summary>
-    /// Interaction logic for CaptionerControl.xaml
-    /// </summary>
     public partial class CaptionerControl : System.Windows.Controls.UserControl
     {
         private ImageFile _activeImageFile;
+        private bool _autoUpdateFileProperties;
 
         public CaptionerControl()
         {
             InitializeComponent();
+            _autoUpdateFileProperties = false;
         }
 
         private async void UpdateStatusMessage(string message, int duration = 3)
@@ -55,19 +54,19 @@ namespace ImageCaptionerPlugin
             try
             {
                 SelectedImage.Source = _imageFile.ImageBmp;
-
                 CaptionText.Text = ImageCaptioner.CaptionImage(_imageFile);
 
                 Run r1 = new Run("File name: " + _imageFile.Name);
                 string tags = "Tags: ";
-                //if (_imageFile.Tags.Length > 0)
-                //{
-                //    foreach (string tag in _imageFile.Tags)
-                //    {
-                //        tags += tag + ", ";
-                //    }
-                //}
-                Run r2 = new Run(tags.Remove(tags.Length - 2));
+                if (_imageFile.Tags != null)
+                {
+                    foreach (string tag in _imageFile.Tags)
+                    {
+                        tags += tag + ", ";
+                    }
+                    tags = tags.Remove(tags.Length - 2);
+                }
+                Run r2 = new Run(tags);
                 Run r3 = new Run("Location: " + _imageFile.FullPath);
 
                 FileInfo.Inlines.Clear();
@@ -169,9 +168,15 @@ namespace ImageCaptionerPlugin
 
         private async void Settings_ClickAsync(object sender, RoutedEventArgs e)
         {
-            var result = await MaterialDesignThemes.Wpf.DialogHost.Show(new ComboBoxViewModel());
-            Console.WriteLine("\n-----------------------------------------");
-            Console.WriteLine(result);
+            ToggleButtonViewModel tbvm = new ToggleButtonViewModel(_autoUpdateFileProperties);
+            var result = await MaterialDesignThemes.Wpf.DialogHost.Show(tbvm);            
+            if (result != null)
+            {
+                if ((bool)result)
+                {
+                    _autoUpdateFileProperties = tbvm.IsEnabled.Value;
+                }
+            }
         }
 
         private void BrowseLocal_Click(object sender, RoutedEventArgs e)
@@ -188,12 +193,7 @@ namespace ImageCaptionerPlugin
                 ProcessSelectedFiles(dlg.FileNames);
             }
         }
-
-        private void RegenerateSummary_Click(object sender, RoutedEventArgs e)
-        {
-            //SummaryText.Text = _activeTextFile.Summary;
-        }
-
+        
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.Clipboard.SetText(CaptionText.Text);
@@ -201,7 +201,6 @@ namespace ImageCaptionerPlugin
 
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
-            //_activeTextFile = null;
             CaptionText.Text = "";
             MDCardCaption.Visibility = Visibility.Hidden;
             MDCardFileInfo.Visibility = Visibility.Hidden;
@@ -212,15 +211,22 @@ namespace ImageCaptionerPlugin
             AddProperties_Button.Visibility = Visibility.Hidden;
         }
 
-        private void AddSummaryToFileProperties_Click(object sender, RoutedEventArgs e)
+        private void UpdateFileProperties_Click(object sender, RoutedEventArgs e)
         {
-            //if (_activeTextFile == null) return;
-            //if (System.Windows.MessageBox.Show(
-            //    "Update file's properties with summary and concepts?",
-            //    "Update file properties", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-            //{
-            //    UpdateStatusMessage(_activeTextFile.UpdateFileProperties(), 3);
-            //}
+            if (_activeImageFile == null) return;
+            if (!_autoUpdateFileProperties)
+            {
+                if (System.Windows.MessageBox.Show(
+                    "Update file's properties with summary and concepts?",
+                    "Update file properties", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    UpdateStatusMessage(_activeImageFile.UpdateFileProperties(), 3);
+                }
+            }
+            else
+            {
+                UpdateStatusMessage(_activeImageFile.UpdateFileProperties(), 3);
+            }
         }
 
         private void Ellipse_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -309,52 +315,21 @@ namespace ImageCaptionerPlugin
         }
     }
 
-    public class ComboBoxViewModel : INotifyPropertyChanged
+    public class ToggleButtonViewModel : INotifyPropertyChanged
     {
-        private int? _selectedValueOne;
-        private string _selectedTextTwo;
+        private bool? _isEnabled;
         private string _selectedValidationOutlined;
         private string _selectedValidationFilled;
 
-        public ComboBoxViewModel()
+        public ToggleButtonViewModel(bool autoUpdateFileProperties)
         {
-            LongListToTestComboVirtualization = new List<int>(Enumerable.Range(0, 1000));
-            ShortStringList = new[]
-            {
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10"
-            };
-
-            int activeDocLength = InstancePipeline.GetActiveDocumentLength();
-            activeDocLength = activeDocLength > 0 ? activeDocLength : 1;
-            //ShortStringList = new[activeDocLength];
-            //for (int i = 1; i <= activeDocLength)
-            //{
-            //    ShortStringList[i - 1] = int.ToString(i);
-            //}
-
-            SelectedValueOne = LongListToTestComboVirtualization.Skip(2).First();
-            SelectedTextTwo = null;
+            _isEnabled = autoUpdateFileProperties;
         }
 
-        public int? SelectedValueOne
+        public bool? IsEnabled
         {
-            get => _selectedValueOne;
-            set => this.MutateVerbose(ref _selectedValueOne, value, RaisePropertyChanged());
-        }
-
-        public string SelectedTextTwo
-        {
-            get => _selectedTextTwo;
-            set => NotifyPropertyChangedExtension.MutateVerbose(this, ref _selectedTextTwo, value, RaisePropertyChanged());
+            get => _isEnabled;
+            set => this.MutateVerbose(ref _isEnabled, value, RaisePropertyChanged());
         }
 
         public string SelectedValidationFilled

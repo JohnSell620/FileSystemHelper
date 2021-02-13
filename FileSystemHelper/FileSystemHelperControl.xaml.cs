@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PluginBase;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,20 @@ namespace FileSystemHelper
         public FileSystemHelperControl()
         {
             InitializeComponent();
+        }
+
+        public FileSystemHelperControl(Dictionary<string, IComponent> components)
+        {
+            InitializeComponent();
+            PluginInfo.Inlines.Clear();
+            PluginHeader.Visibility = Visibility.Visible;
+            foreach (var component in components)
+            {
+                PluginInfo.Inlines.Add(
+                    new Run(component.Key + " v" + component.Value.Version + ": " + component.Value.Description));
+                PluginInfo.Inlines.Add(new LineBreak());
+            }
+            PluginInfo.Visibility = Visibility.Visible;
         }
     }
 }

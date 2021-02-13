@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Shell;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -39,6 +41,32 @@ namespace ImageCaptionerPlugin
             {
                 Console.WriteLine(ex.Data);
             }
+        }
+
+        public string UpdateFileProperties()
+        {
+            try
+            {
+                if (Tags.Length > 0)
+                {
+                    // TODO Prompt to elevate privileges...
+                    var shellProperties = ShellFile.FromFilePath(FullPath).Properties;
+                    shellProperties.System.Keywords.Value = Tags;
+                    shellProperties.System.Subject.Value = Caption;
+
+                    //// using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
+                    //ShellPropertyWriter spw = shellFile.Properties.GetPropertyWriter();
+                    //spw.WriteProperty(SystemProperties.System.Keywords, DocumentConcepts);
+                    //spw.WriteProperty(SystemProperties.System.Subject, Summary);
+                    //spw.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Source.ToString());
+            }
+
+            return "File property updates successful.";
         }
     }
 }
