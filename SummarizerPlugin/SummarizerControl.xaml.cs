@@ -335,7 +335,7 @@ namespace SummarizerPlugin
                 ShortStringList[i - 1] = i.ToString();
             }
             LongListToTestComboVirtualization = new List<int>(Enumerable.Range(2, maxSummaryLength + 1));
-            SelectedValueOne = LongListToTestComboVirtualization.Skip(2).First();
+            SelectedValueOne = LongListToTestComboVirtualization.Skip(1).First();
             SelectedTextTwo = null;
         }
 

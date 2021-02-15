@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrganizerPlugin", "Organize
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiverPlugin", "ArchiverPlugin\ArchiverPlugin.csproj", "{A1162EEF-5D6D-4BF0-BCE3-EFE1275C95F4}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{DAE8E0F1-2117-4BEC-A415-2882779EEA6F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,8 @@ Global
 		{A1162EEF-5D6D-4BF0-BCE3-EFE1275C95F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1162EEF-5D6D-4BF0-BCE3-EFE1275C95F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1162EEF-5D6D-4BF0-BCE3-EFE1275C95F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAE8E0F1-2117-4BEC-A415-2882779EEA6F}.Debug|Any CPU.ActiveCfg = Debug
+		{DAE8E0F1-2117-4BEC-A415-2882779EEA6F}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

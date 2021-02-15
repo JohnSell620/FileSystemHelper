@@ -9,6 +9,8 @@
 *.off
 Dev
 MigrationBackup
+ArchiverPlugin
+OrganizerPlugin
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
