@@ -54,7 +54,6 @@
     </Compile>
     <Compile Include="ImageCaptioner.cs" />
     <Compile Include="ImageFile.cs" />
-    <Compile Include="ImageUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -96,9 +95,19 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\model\requirements.txt" />
     <Content Include="Resources\model\main.py" />
     <Content Include="Resources\model\model.py" />
     <Content Include="Resources\model\utils.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\model\data\checkpoints\train\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\model\data\saved_onnx\decoder.onnx" />
+    <None Include="Resources\model\data\saved_onnx\encoder.onnx" />
+    <None Include="Resources\model\data\saved_onnx\ifem.onnx" />
+    <None Include="Resources\model\README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
