@@ -96,15 +96,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\model\decoder.onnx" />
-    <None Include="Resources\model\encoder.onnx" />
-    <None Include="Resources\model\ifem.onnx" />
-    <!-- <Resource Include="runtimes\win7-x64\native\libtensorflow.dll" Link="runtimes\win7-x64\native\libtensorflow.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="runtimes\win7-x64\native\python38.dll" Link="runtimes\win7-x64\native\python38.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource> -->
+    <Content Include="Resources\model\main.py" />
+    <Content Include="Resources\model\model.py" />
+    <Content Include="Resources\model\utils.py" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
