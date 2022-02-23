@@ -108,6 +108,20 @@
 
                 <StackPanel Margin="16,0,0,16" Grid.Row="0">
 
+                    <Button
+                        x:Name="AddProperties_Button"
+                        Visibility="Hidden"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                        Background="DarkTurquoise"
+                        ToolTip="Add caption text to image file's properties."
+                        Margin="10"
+                        Click="UpdateFileProperties_Click">
+                        <materialDesign:PackIcon
+                            Kind="File"
+                            Height="{StaticResource IconSize}"
+                            Width="{StaticResource IconSize}" />
+                    </Button>
+
                     <Button 
                         x:Name="Copy_Button"
                         Visibility="Hidden"
@@ -132,20 +146,6 @@
                         Click="Clear_Click">
                         <materialDesign:PackIcon
                             Kind="Clear"
-                            Height="{StaticResource IconSize}"
-                            Width="{StaticResource IconSize}" />
-                    </Button>
-
-                    <Button
-                        x:Name="AddProperties_Button"
-                        Visibility="Hidden"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                        Background="DarkTurquoise"
-                        ToolTip="Add caption text to image file's properties."
-                        Margin="10"
-                        Click="UpdateFileProperties_Click">
-                        <materialDesign:PackIcon
-                            Kind="File"
                             Height="{StaticResource IconSize}"
                             Width="{StaticResource IconSize}" />
                     </Button>

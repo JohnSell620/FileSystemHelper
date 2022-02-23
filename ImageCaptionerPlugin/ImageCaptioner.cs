@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -94,48 +95,86 @@ namespace ImageCaptionerPlugin
                 var input2 = outputs1.First();
                 input2.Name = "imageFeatures";
                 var inputs2 = new List<NamedOnnxValue>() { input2 };
-                Console.WriteLine(outputs1.Count);
+                Debug.WriteLine(outputs1.Count);
 
                 // encoder
                 using (var outputs2 = encoder_session.Run(inputs2))
                 {
                     // TODO
+                    var input3 = outputs2.First();
+                    var inputs3 = new List<NamedOnnxValue>() { input3 };
+                    using (var outputs3 = decoder_session.Run(inputs3))
+                    {
+                        // TODO
+                    }
                 }
             }
 
             return "Caption";
         }
 
+        private static Graph ImportGraph(string modelName)
+        {
+            var graph = new Graph().as_default();
+            graph.Import(Path.Combine($"Resources\\model\\data\\{modelName}\\", "saved_model.pb"));
+            return graph;
+        }
+
+        public static NDArray ReadTensorFromImageFile(string file_name,
+                                int input_height = 299,
+                                int input_width = 299,
+                                int input_mean = 0,
+                                int input_std = 255)
+        {
+            return tf_with<Graph, NDArray>(tf.Graph(), graph =>
+            {
+                var file_reader = tf.io.read_file(file_name, "file_reader");
+                var image_reader = tf.image.decode_jpeg(file_reader, channels: 3, name: "jpeg_reader");
+                var caster = tf.cast(image_reader, tf.float32);
+                var dims_expander = tf.expand_dims(caster, 0);
+                var resize = tf.constant(new int[] { input_height, input_width });
+                var bilinear = tf.image.resize_bilinear(dims_expander, resize);
+                var sub = tf.subtract(bilinear, new float[] { input_mean });
+                var normalized = tf.divide(sub, new float[] { input_std });
+
+                return tf_with<Session, NDArray>(tf.Session(graph), sess => sess.run(normalized));
+            });
+        }
+
         public static string CaptionImage(ImageFile imageFile)
         {
-            var image = Image.Load<Rgb24>(imageFile.FullPath, out IImageFormat format);
-            image.Mutate(x =>
+            tf.compat.v1.disable_eager_execution();
+            string caption = "Caption.";
+            using (var ifemGraph = ImportGraph("image_feature_extract_model"))
             {
-                x.Resize(new ResizeOptions
+                var image = ReadTensorFromImageFile(imageFile.FullPath);
+                var inputOperationIfem = ifemGraph.get_operation_by_name("input_1");
+                var outputOperationIfem = ifemGraph.get_operation_by_name("mixed10");
+                var ifemOutput = tf_with<Session, NDArray>(tf.Session(ifemGraph),
+                    sess => sess.run(outputOperationIfem.outputs[0],
+                    new FeedItem(inputOperationIfem.outputs[0], image)));
+
+                using (var encoderGraph = ImportGraph("encoder"))
                 {
-                    Size = new Size(299, 299),
-                    Mode = ResizeMode.Crop
-                });
-            });
+                    var inputOperationEncoder = encoderGraph.get_operation_by_name("input_name");
+                    var outputOperationEncoder = encoderGraph.get_operation_by_name("output");
+                    var encoderOutput = tf_with<Session, NDArray>(tf.Session(encoderGraph),
+                        sess => sess.run(outputOperationEncoder.outputs[0],
+                        new FeedItem(inputOperationEncoder.outputs[0], image)));
 
-            //// TODO
-            //using (var graph = new TFGraph())
-            //{
-            //    var imgFtEx_model = File.ReadAllBytes("C:\\Users\\jsell\\source\\repos\\FileSystemHelper\\ImageCaptionerPlugin\\Resources\\trained_model\\image_feature_extract_model\\save_model.pb");
-            //    graph.Import(new TFBuffer(imgFtEx_model));
+                    using (var decoderGraph = ImportGraph("encoder"))
+                    {
+                        var inputOperationDecoder = decoderGraph.get_operation_by_name("input_name");
+                        var outputOperationDecoder = decoderGraph.get_operation_by_name("output");
+                        var decoderOutput = tf_with<Session, NDArray>(tf.Session(decoderGraph),
+                            sess => sess.run(outputOperationEncoder.outputs[0],
+                            new FeedItem(inputOperationEncoder.outputs[0], image)));
 
-            //    Console.WriteLine(graph.CurrentNameScope);
-
-            //    using (var session = new TFSession(graph))
-            //    {
-            //        var tensor = ImageUtil.CreateTensorFromImageFile(imageFile.FullPath, TFDataType.Float);
-            //        var runner = session.GetRunner();
-            //        runner.AddInput(graph["image_tensor"][0], tensor);
-            //    }
-
-            //}
-
-            return "Caption";
+                        caption = decoderOutput.ToString();
+                    }
+                }
+            }
+            return caption;
         }
     }
 }

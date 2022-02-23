@@ -199,7 +199,7 @@ namespace SummarizerPlugin
 
         private void RegenerateSummary_Click(object sender, RoutedEventArgs e)
         {
-            Clear_Click(null, null);
+            Clear_Click(sender, e);
             GenerateAndPrintSummary(_activeTextFile);
         }
 

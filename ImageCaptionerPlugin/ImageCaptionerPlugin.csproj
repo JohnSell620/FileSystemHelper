@@ -82,7 +82,7 @@
       <Version>1.1.0</Version>
     </PackageReference>
     <PackageReference Include="SciSharp.TensorFlow.Redist">
-      <Version>2.4.0</Version>
+      <Version>2.7.0</Version>
     </PackageReference>
     <PackageReference Include="SixLabors.ImageSharp">
       <Version>1.0.2</Version>
@@ -107,6 +107,15 @@
     <None Include="Resources\model\data\saved_onnx\decoder.onnx" />
     <None Include="Resources\model\data\saved_onnx\encoder.onnx" />
     <None Include="Resources\model\data\saved_onnx\ifem.onnx" />
+    <None Include="Resources\model\data\saved_tf2\decoder\saved_model.pb" />
+    <None Include="Resources\model\data\saved_tf2\decoder\variables\variables.data-00000-of-00001" />
+    <None Include="Resources\model\data\saved_tf2\decoder\variables\variables.index" />
+    <None Include="Resources\model\data\saved_tf2\encoder\saved_model.pb" />
+    <None Include="Resources\model\data\saved_tf2\encoder\variables\variables.data-00000-of-00001" />
+    <None Include="Resources\model\data\saved_tf2\encoder\variables\variables.index" />
+    <None Include="Resources\model\data\saved_tf2\image_features_extract_model\saved_model.pb" />
+    <None Include="Resources\model\data\saved_tf2\image_features_extract_model\variables\variables.data-00000-of-00001" />
+    <None Include="Resources\model\data\saved_tf2\image_features_extract_model\variables\variables.index" />
     <None Include="Resources\model\README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

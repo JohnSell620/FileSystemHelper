@@ -11,6 +11,7 @@ Dev
 MigrationBackup
 ArchiverPlugin
 OrganizerPlugin
+.ionide
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

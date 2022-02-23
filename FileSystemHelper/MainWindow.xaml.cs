@@ -31,7 +31,7 @@ namespace FileSystemHelper
             InitializeComponent();
 
             System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
-            ni.Icon = new System.Drawing.Icon("Resources/Main.ico");
+            ni.Icon = new System.Drawing.Icon("Resources/FSH.ico");
             ni.Visible = true;
             ni.DoubleClick +=
                 delegate (object sender, EventArgs args)

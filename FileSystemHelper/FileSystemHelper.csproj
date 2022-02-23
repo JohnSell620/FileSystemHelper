@@ -129,15 +129,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\FSH2.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\FSHLogo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Main.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\FSH.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
