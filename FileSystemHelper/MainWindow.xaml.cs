@@ -31,10 +31,10 @@ namespace FileSystemHelper
             InitializeComponent();
 
             System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
-            ni.Icon = new System.Drawing.Icon("Resources/Main.ico");
+            ni.Icon = new System.Drawing.Icon("Resources/FSH.ico");
             ni.Visible = true;
             ni.DoubleClick +=
-                delegate (object sender, EventArgs args)
+                delegate (object? sender, EventArgs args)
                 {
                     Show();
                     WindowState = WindowState.Normal;
@@ -66,10 +66,13 @@ namespace FileSystemHelper
                     if (type.GetInterface("IComponent") == typeof(IComponent))
                     {
                         var component = Activator.CreateInstance(type) as IComponent;
-                        _components[component.Name] = component;
-                        _componentControls[component.Name] = component.Control;
+                        if (component != null)
+                        {
+                            _components[component.Name] = component;
+                            _componentControls[component.Name] = component.Control;
+                        }
                     }
-                }                
+                }
             }
         }
 
@@ -80,7 +83,7 @@ namespace FileSystemHelper
                 { 0, "MaterialDesignRaisedLightButton" },
                 { 1, "MaterialDesignRaisedAccentButton" }
             };
-            
+
             int it = 0;
             foreach (KeyValuePair<string, IComponent> component in _components)
             {
@@ -117,53 +120,72 @@ namespace FileSystemHelper
                 PluginsPanel.Children.Add(button);
             }
         }
-        
+
         private void PanelComponent_ButtonClick(object sender, EventArgs e)
         {
-            Button panelButton = sender as Button;
-            var clickedComponent = _components[panelButton.Name];
-            string clickedComponentName = clickedComponent.Name;
+            if (sender != null)
+            {
+                Button? panelButton = sender as Button;
+                var clickedComponent = panelButton != null ? _components[panelButton.Name] : null;
+                string? clickedComponentName = clickedComponent != null ? clickedComponent.Name : null;
 
-            if (s_activePluginName != clickedComponentName)
-            {
-                foreach (UIElement uie in PluginsPanel.Children.OfType<UIElement>().ToList())
+                if (s_activePluginName != clickedComponentName)
                 {
-                    string pluginName = uie.GetValue(NameProperty).ToString();
-                    if (pluginName == clickedComponentName)
+                    foreach (UIElement uie in PluginsPanel.Children.OfType<UIElement>().ToList())
                     {
-                        try
+                        string? pluginName = uie.GetValue(NameProperty).ToString();
+                        if (pluginName == clickedComponentName)
                         {
-                            Cursor = Cursors.Wait;
-                            contentControl.Content = Activator.CreateInstance(clickedComponent.Control) as UserControl;
-                            panelButton.Height = panelButton.Height * 1.1;
-                            panelButton.Width = panelButton.Width * 1.1;
-                            Cursor = Cursors.AppStarting;
+                            try
+                            {
+                                Cursor = Cursors.Wait;
+                                if (clickedComponent != null)
+                                    contentControl.Content = Activator.CreateInstance(clickedComponent.Control) as UserControl;
+                                if (panelButton != null)
+                                {
+                                    panelButton.Height = panelButton.Height * 1.1;
+                                    panelButton.Width = panelButton.Width * 1.1;
+                                }
+                                Cursor = Cursors.AppStarting;
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.ToString());
+                            }
+                            finally
+                            {
+                                Cursor = Cursors.Arrow;
+                            }
                         }
-                        catch (Exception ex)
+                        else if (pluginName == s_activePluginName)
                         {
-                            Console.WriteLine(ex.ToString());
-                        }
-                        finally
-                        {
-                            Cursor = Cursors.Arrow;
+                            if (uie != null)
+                            {
+                                string? buttonHeight = uie.GetValue(HeightProperty).ToString();
+                                string? buttonWidth = uie.GetValue(WidthProperty).ToString();
+                                if (buttonHeight != null && buttonWidth != null)
+                                {
+                                    int buttonHeightInt = int.Parse(buttonHeight.ToString());
+                                    int buttonWidthInt = int.Parse(buttonWidth.ToString());
+                                    uie.SetValue(HeightProperty, buttonHeightInt / 1.1);
+                                    uie.SetValue(WidthProperty, buttonWidthInt / 1.1);
+                                }
+                            }
                         }
                     }
-                    else if (pluginName == s_activePluginName)
-                    {
-                        int buttonHeight = int.Parse(uie.GetValue(HeightProperty).ToString());
-                        int buttonWidth = int.Parse(uie.GetValue(WidthProperty).ToString());
-                        uie.SetValue(HeightProperty, buttonHeight / 1.1);
-                        uie.SetValue(WidthProperty, buttonWidth / 1.1);
-                    }
+                    if (clickedComponentName != null)
+                        s_activePluginName = clickedComponentName;
                 }
-                s_activePluginName = clickedComponentName;
-            }
-            else
-            {
-                panelButton.Height = panelButton.Height / 1.1;
-                panelButton.Width = panelButton.Width / 1.1;
-                contentControl.Content = new FileSystemHelperControl(_components);
-                s_activePluginName = "";
+                else
+                {
+                    if (panelButton != null)
+                    {
+                        panelButton.Height = panelButton.Height / 1.1;
+                        panelButton.Width = panelButton.Width / 1.1;
+                    }
+                    contentControl.Content = new FileSystemHelperControl(_components);
+                    s_activePluginName = "";
+                }
             }
         }
 

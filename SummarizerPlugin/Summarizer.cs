@@ -1,4 +1,4 @@
-﻿using PluginBase;
+using PluginBase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Poseidon.Analysis;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Configuration;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using System.Configuration;
 
 namespace SummarizerPlugin
 {
@@ -29,8 +29,8 @@ namespace SummarizerPlugin
 
         public static string SummarizeByLSA(TextFile textFile)
         {
-            string input = textFile.RawText;
-            string[] sentences = input.Split(new char[] { '.', '!', '?', ':', '…', '\r', '\n' },
+            string? input = textFile.RawText;
+            string[] sentences = input!.Split(new char[] { '.', '!', '?', ':', '�', '\r', '\n' },
                 StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < sentences.Length; ++i)
             {
@@ -46,23 +46,23 @@ namespace SummarizerPlugin
 
             // Remove stop words--e.g., the, and, a, etc.
             string[] stopwords = File.ReadAllLines(@"Resources/stopwords.txt");
-            for (int i = 0; i < sentences.Count(); ++i)
+            for (int i = 0; i < sentences.Length; ++i)
             {
                 string sentence = sentences[i];
-                for (int j = 0; j < stopwords.Count(); ++j)
+                for (int j = 0; j < stopwords.Length; ++j)
                 {
                     sentences[i] = string.Join(" ", sentence.Split(' ').Where(wrd => !stopwords.Contains(wrd)));
                 }
             }
 
             // Reduce words to their stem.
-            PorterStemmer stemmer = new PorterStemmer();
-            for (int i = 0; i < sentences.Count(); ++i)
+            PorterStemmer stemmer = new();
+            for (int i = 0; i < sentences.Length; ++i)
             {
                 sentences[i] = stemmer.StemWord(sentences[i]);
             }
 
-            Dictionary<string, int> wordFrequencies = new Dictionary<string, int>();
+            Dictionary<string, int> wordFrequencies = new();
             foreach (string s in sentences)
             {
                 string[] words = s.Split(' ');
@@ -80,18 +80,18 @@ namespace SummarizerPlugin
             }
 
             // Top N words with highest frequencies will serve as document concepts.
-            int N = textFile.DesiredSummaryLength;
+            int? N = textFile.DesiredSummaryLength;
             string[] concepts = (from kvp in wordFrequencies
                                  orderby kvp.Value descending
                                  select kvp)
-                                .ToDictionary(pair => pair.Key, pair => pair.Value).Take(N)
+                                .ToDictionary(pair => pair.Key, pair => pair.Value).Take(N.Value)
                                 .Select(k => k.Key).ToArray();
 
             // Add concepts to TextFile instance properties.
             textFile.DocumentConcepts = concepts;
 
             int documentLength = sentences.Length;
-            var X = DenseMatrix.Create(N, documentLength, (i, j) => 0.0);
+            var X = DenseMatrix.Create(N.Value, documentLength, (i, j) => 0.0);
             for (int i = 0; i < X.RowCount; ++i)
             {
                 int sentencesWithConcept = 0;
@@ -141,8 +141,8 @@ namespace SummarizerPlugin
 
             var sentenceLengths = Vh.RowSums();
             int[] summaryIndices = new int[Vh.RowCount];
-            Console.Write("Vh.RowCnt = ", Vh.RowCount);
-            Console.Write("concepts.Length = ", concepts.Length);
+            Console.Write($"Vh.RowCnt = {Vh.RowCount}");
+            Console.Write($"concepts.Length = {concepts.Length}");
             for (int i = 0; i < Vh.RowCount; ++i)
             {
                 double max = 0;
@@ -155,7 +155,7 @@ namespace SummarizerPlugin
                     }
                 }
             }
-            
+
             string[] sourceSentences = Regex.Split(input, @"(?<=[\.!\?])\s+");
             textFile.DocumentLength = sourceSentences.Length;
             string summary = "";

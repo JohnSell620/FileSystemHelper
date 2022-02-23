@@ -83,7 +83,7 @@
                     </StackPanel>
 
                 </Grid>
-                
+
             </DataTemplate>
         </materialDesign:DialogHost.DialogContentTemplate>
 
@@ -126,11 +126,11 @@
                         Background="GreenYellow"
                         ToolTip="Copy output to clipboard."
                         Margin="10"
-                        Click="Copy_Click">                        
+                        Click="Copy_Click">
                         <materialDesign:PackIcon
                             Kind="ContentCopy"
                             Height="{StaticResource IconSize}"
-                            Width="{StaticResource IconSize}" />                        
+                            Width="{StaticResource IconSize}" />
                     </Button>
 
                     <Button
@@ -140,11 +140,11 @@
                         Background="MediumPurple"
                         ToolTip="Clear text summary from window."
                         Margin="10"
-                        Click="Clear_Click">                        
+                        Click="Clear_Click">
                         <materialDesign:PackIcon
                             Kind="Clear"
                             Height="{StaticResource IconSize}"
-                            Width="{StaticResource IconSize}" />                        
+                            Width="{StaticResource IconSize}" />
                     </Button>
 
                     <Button
@@ -154,11 +154,11 @@
                         Background="DarkTurquoise"
                         ToolTip="Add summary text to file's properties."
                         Margin="10"
-                        Click="UpdateFileProperties_Click">                        
+                        Click="UpdateFileProperties_Click">
                         <materialDesign:PackIcon
                             Kind="File"
                             Height="{StaticResource IconSize}"
-                            Width="{StaticResource IconSize}" />                        
+                            Width="{StaticResource IconSize}" />
                     </Button>
 
                 </StackPanel>
@@ -169,11 +169,11 @@
                         Style="{StaticResource MaterialDesignOutlinedButton}"
                         Margin="10"
                         ToolTip="Browse files."
-                        Click="BrowseLocal_Click">                        
+                        Click="BrowseLocal_Click">
                         <materialDesign:PackIcon
                             Kind="Search"
                             Height="{StaticResource IconSize}"
-                            Width="{StaticResource IconSize}" />                        
+                            Width="{StaticResource IconSize}" />
                     </Button>
 
                     <Button
@@ -183,11 +183,11 @@
                         Margin="10"
                         ToolTip="Plugin settings."
                         Click="Settings_ClickAsync"
-                        Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}">                        
+                        Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}">
                         <materialDesign:PackIcon
                             Kind="Settings"
                             Height="{StaticResource IconSize}"
-                            Width="{StaticResource IconSize}" />                        
+                            Width="{StaticResource IconSize}" />
                     </Button>
                 </StackPanel>
 
@@ -207,7 +207,7 @@
                     Padding="20"
                     Margin="10,20,10,20"
                     VerticalAlignment="Top" >
-                    
+
                     <StackPanel x:Name="_StackPanel">
                         <Viewbox>
                             <TextBox
@@ -266,7 +266,7 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                
+
                 <Ellipse
                     x:Name="DragAndDrop"
                     Grid.Row="0"
@@ -282,7 +282,7 @@
                     DragLeave="Ellipse_DragLeave"
                     DragOver="Ellipse_DragOver"
                     Drop="Ellipse_Drop" />
-                    <!--GiveFeedback="Ellipse_GiveFeedback"-->
+                <!--GiveFeedback="Ellipse_GiveFeedback"-->
 
                 <TextBlock
                     x:Name="StatusMessage"

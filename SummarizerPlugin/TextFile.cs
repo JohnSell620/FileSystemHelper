@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.WindowsAPICodePack.Shell;
-using DocumentFormat.OpenXml.Packaging;
 using System.Xml;
-using AODL.Document.TextDocuments;
-using AODL.Document.Content;
+using System.Linq;
 using System.Xml.Linq;
-using BitMiracle.Docotic.Pdf;
 using Microsoft.Win32;
+using AODL.Document.Content;
+using BitMiracle.Docotic.Pdf;
+using AODL.Document.TextDocuments;
+using DocumentFormat.OpenXml.Packaging;
+using Microsoft.WindowsAPICodePack.Shell;
+using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
 
 namespace SummarizerPlugin
 {
     public class TextFile
     {
-        public string Name { get; set; }
-        public string FullPath { get; set; }
-        public string Extension { get; set; }
-        public string RawText { get; set; }
-        public int DocumentLength { get; set; }
-        public string[] DocumentConcepts { get; set; }
-        public string Summary { get; set; }
+        public string? Name { get; set; }
+        public string? FullPath { get; set; }
+        public string? Extension { get; set; }
+        public string? RawText { get; set; }
+        public int? DocumentLength { get; set; }
+        public string[]? DocumentConcepts { get; set; }
+        public string? Summary { get; set; }
         public int DesiredSummaryLength { get; set; }
 
         public TextFile() { }
@@ -73,25 +71,24 @@ namespace SummarizerPlugin
                     }
                     else
                     {
-                        if (DocumentConcepts.Length > 0)
+                        if (DocumentConcepts != null && DocumentConcepts.Length > 0)
                         {
                             // TODO Prompt to elevate privileges...
                             var shellProperties = ShellFile.FromFilePath(FullPath).Properties;
                             shellProperties.System.Keywords.Value = DocumentConcepts;
                             shellProperties.System.Subject.Value = Summary;
 
-                            //// using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
-                            //ShellPropertyWriter spw = shellFile.Properties.GetPropertyWriter();
-                            //spw.WriteProperty(SystemProperties.System.Keywords, DocumentConcepts);
-                            //spw.WriteProperty(SystemProperties.System.Subject, Summary);
-                            //spw.Close();
+                            using ShellPropertyWriter spw = shellProperties.GetPropertyWriter();
+                            spw.WriteProperty(SystemProperties.System.Keywords, DocumentConcepts);
+                            spw.WriteProperty(SystemProperties.System.Subject, Summary);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Source.ToString());
+                if (ex.Source != null)
+                    Console.WriteLine(ex.Source.ToString());
             }
 
             return "File property updates successful.";
@@ -120,7 +117,7 @@ namespace SummarizerPlugin
             const string wordmlNamespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
             System.Text.StringBuilder textBuilder = new System.Text.StringBuilder();
-            using (WordprocessingDocument wdDoc = WordprocessingDocument.Open(file /* file.OpenBinaryStream() */, false))
+            using (WordprocessingDocument? wdDoc = WordprocessingDocument.Open(file /* file.OpenBinaryStream() */, false))
             {
                 // Manage namespaces to perform XPath queries.  
                 NameTable nt = new NameTable();
@@ -132,15 +129,21 @@ namespace SummarizerPlugin
                 XmlDocument xdoc = new XmlDocument(nt);
                 xdoc.Load(wdDoc.MainDocumentPart.GetStream());
 
-                XmlNodeList paragraphNodes = xdoc.SelectNodes("//w:p", nsManager);
-                foreach (XmlNode paragraphNode in paragraphNodes)
+                XmlNodeList? paragraphNodes = xdoc.SelectNodes("//w:p", nsManager);
+                if (paragraphNodes != null)
                 {
-                    XmlNodeList textNodes = paragraphNode.SelectNodes(".//w:t", nsManager);
-                    foreach (System.Xml.XmlNode textNode in textNodes)
+                    foreach (XmlNode paragraphNode in paragraphNodes)
                     {
-                        textBuilder.Append(textNode.InnerText);
+                        XmlNodeList? textNodes = paragraphNode.SelectNodes(".//w:t", nsManager);
+                        if (textNodes != null)
+                        {
+                            foreach (System.Xml.XmlNode textNode in textNodes)
+                            {
+                                textBuilder.Append(textNode.InnerText);
+                            }
+                            textBuilder.Append(System.Environment.NewLine);
+                        }
                     }
-                    textBuilder.Append(System.Environment.NewLine);
                 }
 
             }

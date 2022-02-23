@@ -19,5 +19,5 @@
         </Grid.ColumnDefinitions>
         <StackPanel x:Name="PluginsPanel" Grid.Column="0" Width="120" />
         <ContentControl x:Name="contentControl" Grid.Column="1"/>
-    </Grid>    
+    </Grid>
 </Window>

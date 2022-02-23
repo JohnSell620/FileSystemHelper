@@ -1,19 +1,15 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Forms;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Globalization;
 using System.Threading;
@@ -22,7 +18,7 @@ namespace SummarizerPlugin
 {
     public partial class SummarizerControl : System.Windows.Controls.UserControl
     {
-        private TextFile _activeTextFile;
+        private TextFile? _activeTextFile;
         private int _desiredSummaryLength;
 
         public SummarizerControl()
@@ -47,25 +43,28 @@ namespace SummarizerPlugin
 
             StatusMessage.Visibility = Visibility.Hidden;
         }
-        
+
         private void GenerateAndPrintSummary(TextFile textFile)
         {
             try
             {
-                string summaryText = Summarizer.SummarizeByLSA(textFile);
-                textFile.Summary = summaryText;                
+                string summaryText = Summarizer.SummarizeByLSA(textFile!);
+                textFile.Summary = summaryText;
                 SummaryText.Text = summaryText;
 
                 string documentConcepts = "";
-                foreach (string s in textFile.DocumentConcepts)
+                if (textFile.DocumentConcepts != null)
                 {
-                    documentConcepts += s + ", ";
+                    foreach (string s in textFile.DocumentConcepts)
+                    {
+                        documentConcepts += s + ", ";
+                    }
                 }
 
-                Run r1 = new Run("File name: " + textFile.Name);
-                Run r2 = new Run("Concepts: " + documentConcepts.Remove(documentConcepts.Length - 2));
-                Run r3 = new Run("Location: " + textFile.FullPath);
-                
+                Run r1 = new("File name: " + textFile.Name);
+                Run r2 = new("Concepts: " + documentConcepts.Remove(documentConcepts.Length - 2));
+                Run r3 = new("Location: " + textFile.FullPath);
+
                 FileInfo.Inlines.Clear();
                 FileInfo.Inlines.Add(r1);
                 FileInfo.Inlines.Add(new LineBreak());
@@ -77,9 +76,9 @@ namespace SummarizerPlugin
                 MDCardFileInfo.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
-            {                
+            {
                 Console.WriteLine(ex.Message);
-            }            
+            }
         }
 
         private void ProcessSelectedFiles(string[] fileNames)
@@ -87,19 +86,19 @@ namespace SummarizerPlugin
             /* 
              * Handle improper file types
              */
-            Form wf = new Form() { Size = new System.Drawing.Size(0, 0) };
+            Form wf = new() { Size = new System.Drawing.Size(0, 0) };
             Task.Delay(TimeSpan.FromSeconds(7))
                 .ContinueWith((t) => wf.Close(), TaskScheduler.FromCurrentSynchronizationContext());
 
             if (fileNames.Length == 1)
             {
                 string fileExt = System.IO.Path.GetExtension(fileNames[0]);
-                                
+
                 if (fileExt == ".docx" || fileExt == ".odt" || fileExt == ".pdf")
                 {
                     AddProperties_Button.Visibility = Visibility.Visible;
                 }
-                else if (fileExt == ".txt" /* Txt file properties cannot be updated */) 
+                else if (fileExt == ".txt" /* Txt file properties cannot be updated */)
                 {
                     AddProperties_Button.Visibility = Visibility.Hidden;
                 }
@@ -112,7 +111,7 @@ namespace SummarizerPlugin
                     return;
                 }
 
-                _activeTextFile = new TextFile(fileNames[0]);
+                _activeTextFile = new(fileNames[0]);
                 _activeTextFile.DesiredSummaryLength = _desiredSummaryLength;
                 GenerateAndPrintSummary(_activeTextFile);
 
@@ -124,7 +123,7 @@ namespace SummarizerPlugin
             else if (fileNames.Length > 1)
             {
                 string overallSummary = "";
-                string overallPath = System.IO.Path.GetDirectoryName(fileNames[0]);
+                string? overallPath = System.IO.Path.GetDirectoryName(fileNames[0]);
                 foreach (string filePath in fileNames)
                 {
                     string fileExt = "";
@@ -136,14 +135,14 @@ namespace SummarizerPlugin
                     {
                         Console.WriteLine(ex.Message);
                     }
-                    
+
                     // Handle invalid file types
                     if (!"docx|odt|pdf|txt".Contains(fileExt))
                     {
                         continue;
                     }
 
-                    _activeTextFile = new TextFile(filePath);
+                    _activeTextFile = new(filePath);
                     overallSummary += Summarizer.SummarizeByLSA(_activeTextFile);
                 }
 
@@ -167,13 +166,14 @@ namespace SummarizerPlugin
                 GenerateAndPrintSummary(_activeTextFile);
             }
         }
-        
+
         private async void Settings_ClickAsync(object sender, RoutedEventArgs e)
         {
-            int activeTextFileLength = _activeTextFile == null ? 10 : _activeTextFile.DocumentLength;
-            ComboBoxViewModel cbvm = new ComboBoxViewModel(activeTextFileLength);
+            int? activeTextFileLength = _activeTextFile == null || _activeTextFile.DocumentLength == null ?
+                                        10 : _activeTextFile.DocumentLength.Value;
+            ComboBoxViewModel cbvm = new(activeTextFileLength.Value);
             var result = await MaterialDesignThemes.Wpf.DialogHost.Show(cbvm);
-            if ((bool)result)
+            if (result != null && (bool)result && cbvm.SelectedValueOne != null)
             {
                 _desiredSummaryLength = cbvm.SelectedValueOne.Value;
             }
@@ -181,7 +181,7 @@ namespace SummarizerPlugin
 
         private void BrowseLocal_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
+            Microsoft.Win32.OpenFileDialog dlg = new()
             {
                 DefaultExt = ".docx",
                 InitialDirectory = @"C:\Users\jsell\source\repos\FileSystemHelper\Dev",
@@ -199,8 +199,8 @@ namespace SummarizerPlugin
 
         private void RegenerateSummary_Click(object sender, RoutedEventArgs e)
         {
-            Clear_Click(null, null);
-            GenerateAndPrintSummary(_activeTextFile);
+            Clear_Click(sender, e);
+            GenerateAndPrintSummary(_activeTextFile!);
         }
 
         private void Copy_Click(object sender, RoutedEventArgs e)
@@ -230,7 +230,7 @@ namespace SummarizerPlugin
                 UpdateStatusMessage(_activeTextFile.UpdateFileProperties(), 3);
             }
         }
-        
+
         private void Ellipse_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (sender is Ellipse ellipse && e.LeftButton == MouseButtonState.Pressed)
@@ -241,7 +241,7 @@ namespace SummarizerPlugin
             }
         }
 
-        private Brush _previousFill = null;
+        private Brush? _previousFill = null;
         private void Ellipse_DragEnter(object sender, System.Windows.DragEventArgs e)
         {
             if (sender is Ellipse ellipse)
@@ -255,10 +255,10 @@ namespace SummarizerPlugin
                     string dataString = (string)e.Data.GetData(System.Windows.DataFormats.StringFormat);
 
                     // If the string can be converted into a Brush, convert it.
-                    BrushConverter converter = new BrushConverter();
+                    BrushConverter converter = new();
                     if (converter.IsValid(dataString))
                     {
-                        Brush newFill = (Brush)converter.ConvertFromString(dataString);
+                        Brush? newFill = converter.ConvertFromString(dataString) as Brush;
                         ellipse.Fill = newFill;
                     }
                 }
@@ -275,7 +275,7 @@ namespace SummarizerPlugin
                 string dataString = (string)e.Data.GetData(System.Windows.Forms.DataFormats.StringFormat);
 
                 // If the string can be converted into a Brush, allow copying.
-                BrushConverter converter = new BrushConverter();
+                BrushConverter converter = new();
                 if (converter.IsValid(dataString))
                 {
                     e.Effects = System.Windows.DragDropEffects.Copy | System.Windows.DragDropEffects.Move;
@@ -304,11 +304,11 @@ namespace SummarizerPlugin
 
                     // If the string can be converted into a Brush,
                     // convert it and apply it to the ellipse.
-                    BrushConverter converter = new BrushConverter();
+                    BrushConverter converter = new();
                     string firstFileName = fileNames[0].ToString();
                     if (converter.IsValid(firstFileName))
                     {
-                        Brush newFill = (Brush)converter.ConvertFromString(firstFileName);
+                        Brush? newFill = converter.ConvertFromString(firstFileName) as Brush;
                         ellipse.Fill = newFill;
                         e.Effects = System.Windows.DragDropEffects.Copy;
                     }
@@ -320,9 +320,14 @@ namespace SummarizerPlugin
     public class ComboBoxViewModel : INotifyPropertyChanged
     {
         private int? _selectedValueOne;
-        private string _selectedTextTwo;
-        private string _selectedValidationOutlined;
-        private string _selectedValidationFilled;
+        private string? _selectedTextTwo;
+        private string? _selectedValidationOutlined;
+        private string? _selectedValidationFilled;
+
+        public IList<int> LongListToTestComboVirtualization { get; }
+        public IList<string> ShortStringList { get; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public ComboBoxViewModel(int activeDocLength)
         {
@@ -345,28 +350,24 @@ namespace SummarizerPlugin
             set => this.MutateVerbose(ref _selectedValueOne, value, RaisePropertyChanged());
         }
 
-        public string SelectedTextTwo
+        public string? SelectedTextTwo
         {
             get => _selectedTextTwo;
             set => NotifyPropertyChangedExtension.MutateVerbose(this, ref _selectedTextTwo, value, RaisePropertyChanged());
         }
 
-        public string SelectedValidationFilled
+        public string? SelectedValidationFilled
         {
             get => _selectedValidationFilled;
             set => NotifyPropertyChangedExtension.MutateVerbose(this, ref _selectedValidationFilled, value, RaisePropertyChanged());
         }
 
-        public string SelectedValidationOutlined
+        public string? SelectedValidationOutlined
         {
             get => _selectedValidationOutlined;
             set => NotifyPropertyChangedExtension.MutateVerbose(this, ref _selectedValidationOutlined, value, RaisePropertyChanged());
         }
 
-        public IList<int> LongListToTestComboVirtualization { get; }
-        public IList<string> ShortStringList { get; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         private System.Action<PropertyChangedEventArgs> RaisePropertyChanged()
         {
@@ -384,7 +385,7 @@ namespace SummarizerPlugin
 
     public static class NotifyPropertyChangedExtension
     {
-        public static bool MutateVerbose<TField>(this INotifyPropertyChanged _, ref TField field, TField newValue, Action<PropertyChangedEventArgs> raise, [CallerMemberName] string propertyName = null)
+        public static bool MutateVerbose<TField>(this INotifyPropertyChanged _, ref TField field, TField newValue, Action<PropertyChangedEventArgs> raise, [CallerMemberName] string? propertyName = null)
         {
             if (EqualityComparer<TField>.Default.Equals(field, newValue)) return false;
             field = newValue;

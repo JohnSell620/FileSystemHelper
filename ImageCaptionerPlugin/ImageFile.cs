@@ -1,29 +1,24 @@
-﻿using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Shell;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using Microsoft.WindowsAPICodePack.Shell;
 
 namespace ImageCaptionerPlugin
 {
     public class ImageFile
     {
-        public string Name { get; set; }
-        public string FullPath { get; set; }
-        public string Extension { get; set; }
-        public BitmapImage ImageBmp { get; set; }
-        public string Caption { get; set; }
+        public string? Name { get; set; }
+        public string? FullPath { get; set; }
+        public string? Extension { get; set; }
+        public BitmapImage? ImageBmp { get; set; }
+        public string? Caption { get; set; }
 
-        // Windows properties
-        public string[] Title { get; set; }
-        public string[] Tags { get; set; }
-        public string Subject { get; set; }
-        public int Height { get; set; }
-        public int Width { get; set; }
+        // Windows file properties
+        public string[]? Title { get; set; }
+        public string[]? Tags { get; set; }
+        public string? Subject { get; set; }
+        public int? Height { get; set; }
+        public int? Width { get; set; }
 
         public ImageFile() { }
         public ImageFile(string _fullPath)
@@ -43,27 +38,37 @@ namespace ImageCaptionerPlugin
             }
         }
 
+        public byte[] GetByteArray()
+        {
+            byte[]? iba = null;
+            FileStream fileStream = new(FullPath!, FileMode.Open, FileAccess.Read);
+            using (BinaryReader reader = new(fileStream))
+            {
+                iba = new byte[reader.BaseStream.Length];
+                for (int i = 0; i < reader.BaseStream.Length; i++)
+                    iba[i] = reader.ReadByte();
+            }
+            return iba;
+        }
+
         public string UpdateFileProperties()
         {
             try
             {
-                if (Tags.Length > 0)
+                if (Tags != null && Tags.Length > 0)
                 {
                     // TODO Prompt to elevate privileges...
                     var shellProperties = ShellFile.FromFilePath(FullPath).Properties;
                     shellProperties.System.Keywords.Value = Tags;
                     shellProperties.System.Subject.Value = Caption;
-
-                    //// using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
-                    //ShellPropertyWriter spw = shellFile.Properties.GetPropertyWriter();
-                    //spw.WriteProperty(SystemProperties.System.Keywords, DocumentConcepts);
-                    //spw.WriteProperty(SystemProperties.System.Subject, Summary);
-                    //spw.Close();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Source.ToString());
+                if (ex.Source != null)
+                {
+                    Console.WriteLine(ex.Source.ToString());
+                }
             }
 
             return "File property updates successful.";
