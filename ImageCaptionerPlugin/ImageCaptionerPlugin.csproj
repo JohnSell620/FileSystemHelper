@@ -25,24 +25,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Model\decoder\saved_model.pb" />
-    <None Remove="Resources\Model\decoder\variables\variables.data-00000-of-00001" />
-    <None Remove="Resources\Model\decoder\variables\variables.index" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Resources\Model\decoder\saved_model.pb" />
-    <Content Include="Resources\Model\decoder\variables\variables.data-00000-of-00001" />
-    <Content Include="Resources\Model\decoder\variables\variables.index" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="4.3.0" />
     <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PluginBase\PluginBase.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\Model\" />
   </ItemGroup>
 
 </Project>
