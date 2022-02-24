@@ -4,11 +4,9 @@
 * text=auto
 
 ###############################################################################
-# Specify project languages.
+# Linguist should ignore .pb files.
 ###############################################################################
-* linguist-language=c#
-ImageCaptionerPlugin/Resources/* linguist-language=Dockerfile
-ImageCaptionerPlugin/Resources/model/*.py linguist-language=Python
+ImageCaptionerPlugin/Resources/model/* linguist-vendored
 
 ###############################################################################
 # Set default behavior for command prompt diff.
