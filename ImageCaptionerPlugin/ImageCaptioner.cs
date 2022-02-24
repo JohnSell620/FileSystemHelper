@@ -41,7 +41,7 @@ namespace ImageCaptionerPlugin
             if (response.Result.StatusCode == HttpStatusCode.OK)
             {
                 string? temp = response.Result.Content.ReadAsStringAsync().Result.ToString();
-                Regex rx = new(@"(?<=caption"": "")(.*)(?= <end>)");
+                Regex rx = new(@"\s*(?<=caption"":\s*"")(.*)(?=\s*<end>)\s*");
                 var matches = rx.Matches(temp!);
                 if (matches.Count > 0)
                 {

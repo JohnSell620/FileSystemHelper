@@ -2,8 +2,11 @@
 
 import os
 import json
+import time
+import utils
 import numpy as np
 import tensorflow as tf
+from tqdm import tqdm
 
 
 class BahdanauAttention(tf.keras.Model):
@@ -45,8 +48,9 @@ class CNN_Encoder(tf.keras.Model):
         super(CNN_Encoder, self).__init__()
         # shape after fc == (batch_size, 64, embedding_dim=256)
         self.fc = tf.keras.layers.Dense(256)
-
-    @tf.function #(input_signature = [tf.TensorSpec(shape=[1, 64, features_shape],)])
+        
+    # input_signature => shape=[None, attention_features_shape, features_shape]
+    @tf.function(input_signature = [tf.TensorSpec(shape=[None, 64, 2048],)])
     def call(self, x):
         x = self.fc(x)
         x = tf.nn.relu(x)
@@ -64,8 +68,8 @@ class RNN_Decoder(tf.keras.Model):
         self.fc2 = tf.keras.layers.Dense(5000)
         self.attention = BahdanauAttention()
         
-        def reset_state(self, batch_size):
-            return tf.zeros((batch_size, 512))
+    def reset_state(self, batch_size):
+        return tf.zeros((batch_size, 512))
 
     @tf.function
     def call(self, x):
@@ -116,38 +120,10 @@ class ImageCaptioner(tf.keras.Model):
 
         self.optimizer = tf.keras.optimizers.Adam()
         self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
-        self.tokenizer, self.max_length = self.preprocess_tokenize_captions()
+        self.tokenizer, _, self.max_length, _ = utils.preprocess_tokenize_captions()
 
         self.cwd = os.getcwd()
-        
-    def load_image(self, imgbyte_array):
-        img = tf.image.decode_jpeg(imgbyte_array, channels=3)
-        img = tf.image.resize(img, (299, 299))
-        img = tf.keras.applications.inception_v3.preprocess_input(img)
-        return img
-
-    def preprocess_tokenize_captions(self):
-        with open(os.getcwd() + '/annotations/captions_train2014.json', 'r') as f:
-            annotations = json.load(f)
-        
-        # Build vocabulary
-        vocab = []
-        for val in annotations['annotations']:
-            vocab.append(f"<start> {val['caption']} <end>")
-
-        # Choose the top 5000 words from the vocabulary
-        tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=5000, oov_token="<unk>", filters=r'!"#$%&()*+.,-/:;=?@[\]^_`{|}~ ')
-        tokenizer.fit_on_texts(vocab)
-        tokenizer.word_index['<pad>'] = 0
-        tokenizer.index_word[0] = '<pad>'
-
-        # Create the tokenized vectors
-        train_seqs = tokenizer.texts_to_sequences(vocab)
-
-        # Calculates the max_length, which is used to store the attention weights
-        max_length = max(len(t) for t in train_seqs)
-
-        return tokenizer, max_length
+        self.checkpoint_path = os.path.join(self.cwd, '/data/checkpoints/train/')
     
     def call(self, x):
         """ input_shape=(1, 299, 299, 3) """
@@ -166,12 +142,103 @@ class ImageCaptioner(tf.keras.Model):
             dec_input = tf.expand_dims([predicted_id], 0)
         return result
 
+    def train_cache_encoder_features(self, dataset_size=10000):
+        """Initialize encoder before training since this could become a bottleneck"""
+        _, img_name_vector = utils.get_encoder_training_data(dataset_size=dataset_size)
+        # Get unique images
+        encode_train = sorted(set(img_name_vector))
+        # del img_name_vector
+        # gc.collect()
+
+        # Feel free to change batch_size according to your system configuration
+        image_dataset = tf.data.Dataset.from_tensor_slices(encode_train)
+        ''' With batch size greater than 16, my gpu is running near the threshold of available memory. 
+            TF_ENABLE_GPU_GARBAGE_COLLECTION=false to disable warning.
+        '''
+        image_dataset = image_dataset.map(utils.load_image, num_parallel_calls=tf.data.AUTOTUNE).batch(16)
+
+        for img, path in tqdm(image_dataset):
+            batch_features = self.image_features_extract_model(img)
+            batch_features = tf.reshape(batch_features, (batch_features.shape[0], -1, batch_features.shape[3]))
+
+            for bf, p in zip(batch_features, path):
+                path_of_feature = p.numpy().decode("utf-8")
+                container_path = os.getcwd() + '/data/feature_cache/' + os.path.basename(path_of_feature)
+                np.save(container_path, bf.numpy())
+
+    def loss_function(self, real, pred):
+        mask = tf.math.logical_not(tf.math.equal(real, 0))
+        loss_ = self.loss_object(real, pred)
+        mask = tf.cast(mask, dtype=loss_.dtype)
+        loss_ *= mask
+        return tf.reduce_mean(loss_)
+
+    @tf.function
+    def train_step(self, img_tensor, target):
+        # Initializing the hidden state for each batch
+        # because the captions are not related from image to image
+        hidden = self.decoder.reset_state(batch_size=target.shape[0])
+        dec_input = tf.expand_dims([self.tokenizer.word_index['<start>']] * target.shape[0], 1)
+
+        loss = 0
+        with tf.GradientTape() as tape:
+            features = self.encoder(img_tensor)
+            for i in range(1, target.shape[1]):
+                # passing the features through the decoder
+                predictions, hidden, _ = self.decoder((dec_input, features, hidden))
+                loss += self.loss_function(target[:, i], predictions)
+                # using teacher forcing
+                dec_input = tf.expand_dims(target[:, i], 1)
+
+        total_loss = (loss / int(target.shape[1]))
+        trainable_variables = self.encoder.trainable_variables + self.decoder.trainable_variables
+        gradients = tape.gradient(loss, trainable_variables)
+        self.optimizer.apply_gradients(zip(gradients, trainable_variables))
+        return loss, total_loss
+
+    def train(self, epochs=50, plot_loss=False):
+        ckpt = tf.train.Checkpoint(encoder=self.encoder,
+                                   decoder=self.decoder,
+                                   optimizer=self.optimizer)
+        ckpt_manager = tf.train.CheckpointManager(ckpt, self.checkpoint_path, max_to_keep=5)
+        
+        start_epoch = 0
+        if ckpt_manager.latest_checkpoint:
+            start_epoch = int(ckpt_manager.latest_checkpoint.split('-')[-1])
+            # restoring the latest checkpoint in checkpoint_path
+            ckpt.restore(ckpt_manager.latest_checkpoint)
+
+        loss_plot = []
+        dataset, num_steps, self.tokenizer, self.max_length = utils.get_dataset(dateset_type='train')
+        for epoch in range(start_epoch, epochs + 1):
+            start = time.time()
+            total_loss = 0
+
+            for (batch, (img_tensor, target)) in enumerate(dataset):
+                batch_loss, t_loss = self.train_step(img_tensor, target)
+                total_loss += t_loss
+
+                if batch % 100 == 0:
+                    print ('Epoch {} Batch {} Loss {:.4f}'.format(
+                        epoch, batch, batch_loss.numpy() / int(target.shape[1])))
+            # storing the epoch end loss value to plot later
+            loss_plot.append(total_loss / num_steps)
+
+            if epoch % 5 == 0:
+                ckpt_manager.save()
+
+            print ('Epoch {} Loss {:.6f}'.format(epoch, total_loss/num_steps))
+            print ('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
+
     def caption(self, imgbyte_arr):
         if self.tokenizer == None and self.max_length == None:
             print("Model is untrained.")
             return
 
-        temp_input = tf.expand_dims(self.load_image(imgbyte_arr), 0)
+        img = tf.image.decode_jpeg(imgbyte_arr, channels=3)
+        img = tf.image.resize(img, (299, 299))
+        img = tf.keras.applications.inception_v3.preprocess_input(img)
+        temp_input = tf.expand_dims(img, 0)
         img_tensor_val = self.image_features_extract_model(temp_input)
         img_tensor_val = tf.reshape(img_tensor_val, (img_tensor_val.shape[0], -1, img_tensor_val.shape[3]))
 
@@ -195,7 +262,7 @@ class ImageCaptioner(tf.keras.Model):
 
             dec_input = tf.expand_dims([predicted_id], 0)
 
-        return ' '.join(' '.join(result))
+        return result
 
     def load_model(self):
         self.image_features_extract_model = tf.keras.models.load_model(
@@ -204,3 +271,13 @@ class ImageCaptioner(tf.keras.Model):
             filepath=self.cwd + '/encoder', compile=False)
         self.decoder = tf.keras.models.load_model(
             filepath=self.cwd + '/decoder', compile=False)
+
+    def save_model(self):
+        self.image_features_extract_model.save(self.cwd + '/image_features_extract_model')
+        self.encoder.save(self.cwd + '/encoder')
+        self.decoder.save(self.cwd + '/decoder')
+
+    def summary(self):
+        self.image_features_extract_model.summary()
+        self.encoder.summary()
+        self.decoder.summary()
